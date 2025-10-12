@@ -53,7 +53,7 @@ enum MainMenuOptions {
     RemoveEmployee,
     GetEmployeeDetails,
     DoSomethingElse,
-    ExitMainMenu = 0
+    ExitMainMenu = -1
 };
 
 enum AddMenuOptions {

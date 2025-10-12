@@ -29,27 +29,36 @@ public:
     std::string titleLine = "       " + titleParm;
     if (titleLine.length() > maxLen)
       maxLen = titleLine.length();
+
     for (int i = 0; i < numOptionsParm; ++i)
     {
       std::string optionLine = "       " + std::to_string(i + 1) + ". " + optionsParm[i];
       if (optionLine.length() > maxLen)
         maxLen = optionLine.length();
     }
-    std::string exitMsg = "(Enter " + std::to_string(exitCodeParm) + " to ";
-    exitMsg += (exitCodeParm == ExitMainMenu) ? "exit" : "go back to previous menu";
-    exitMsg += ")";
+
+    // Change only the printed exit/go-back hint. Do not change any input logic.
+    // For main menu (exitCodeParm == ExitMainMenu), show -1 as the displayed code.
+    int displayExitCode = (exitCodeParm == ExitMainMenu) ? -1 : exitCodeParm;
+    std::string exitMsg = "Press " + std::to_string(displayExitCode) +
+                          ((exitCodeParm == ExitMainMenu) ? " to Exit" : " to go back to previous menu");
     std::string exitLine = "         " + exitMsg;
+
     if (exitLine.length() > maxLen)
       maxLen = exitLine.length();
+
     size_t totalWidth = maxLen + 2;
+
     std::cout << std::string(totalWidth, '-') << "\n";
     std::cout << "|" << titleLine << std::string(totalWidth - 1 - titleLine.length(), ' ') << "|\n";
     std::cout << std::string(totalWidth, '-') << "\n";
+
     for (int i = 0; i < numOptionsParm; ++i)
     {
       std::string optionLine = "       " + std::to_string(i + 1) + ". " + optionsParm[i];
       std::cout << "|" << optionLine << std::string(totalWidth - 1 - optionLine.length(), ' ') << "|\n";
     }
+
     std::cout << "|" << exitLine << std::string(totalWidth - 1 - exitLine.length(), ' ') << "|\n";
     std::cout << std::string(totalWidth, '-') << "\n";
   }
@@ -173,11 +182,13 @@ public:
   {
     if (typeParm == Contractor)
     {
+      // Simple logic: Contractors leave 1-3 years after joining
       int sYear = std::stoi(dojParm.substr(6, 4)) + 1 + (std::rand() % 3);
       return dojParm.substr(0, 6) + std::to_string(sYear);
     }
     else if (typeParm == Intern)
     {
+      // Interns leave 6 months to 1 year after joining
       int sMonth = std::stoi(dojParm.substr(3, 2)) + 6 + (std::rand() % 7);
       int sYear = std::stoi(dojParm.substr(6, 4));
       if (sMonth > 12)
@@ -186,9 +197,10 @@ public:
         sYear += 1;
       }
       char sDate[11];
-      std::snprintf(sDate, sizeof(sDate), "%02d-%02d-%04d", std::stoi(dojParm.substr(0, 2)), sMonth, sYear);
+      std::sprintf(sDate, "%02d-%02d-%04d", std::stoi(dojParm.substr(0, 2)), sMonth, sYear);
       return std::string(sDate);
     }
+    // Full-time employees do not have a predefined leaving date
     return getRandomDate();
   }
 
