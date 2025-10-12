@@ -7,6 +7,7 @@
 #include <limits>
 #include <cstdlib>
 #include <ctime>
+#include <cstdio>
 
 /**
  * @class HelperFunctions
@@ -75,8 +76,7 @@ public:
     {
       return sMaleNames[sIndex];
     }
-
-    if (genderParm == "Female")
+    else
     {
       return sFemaleNames[sIndex];
     }
@@ -101,7 +101,7 @@ public:
     int sMonth = 1 + std::rand() % 12;
     int sYear = 1990 + std::rand() % 30;
     char sDate[11];
-    std::sprintf(sDate, "%02d-%02d-%04d", sDay, sMonth, sYear);
+    std::snprintf(sDate, sizeof(sDate), "%02d-%02d-%04d", sDay, sMonth, sYear);
     return std::string(sDate);
   }
 
@@ -173,13 +173,11 @@ public:
   {
     if (typeParm == Contractor)
     {
-      // Simple logic: Contractors leave 1-3 years after joining
       int sYear = std::stoi(dojParm.substr(6, 4)) + 1 + (std::rand() % 3);
       return dojParm.substr(0, 6) + std::to_string(sYear);
     }
     else if (typeParm == Intern)
     {
-      // Interns leave 6 months to 1 year after joining
       int sMonth = std::stoi(dojParm.substr(3, 2)) + 6 + (std::rand() % 7);
       int sYear = std::stoi(dojParm.substr(6, 4));
       if (sMonth > 12)
@@ -188,10 +186,9 @@ public:
         sYear += 1;
       }
       char sDate[11];
-      std::sprintf(sDate, "%02d-%02d-%04d", std::stoi(dojParm.substr(0, 2)), sMonth, sYear);
+      std::snprintf(sDate, sizeof(sDate), "%02d-%02d-%04d", std::stoi(dojParm.substr(0, 2)), sMonth, sYear);
       return std::string(sDate);
     }
-    // Full-time employees do not have a predefined leaving date
     return getRandomDate();
   }
 
