@@ -29,7 +29,7 @@ XyzInternEmployee::XyzInternEmployee(const std::string& nameParm, const std::str
       mCollege(collegeParm), mBranch(branchParm) {}
 
 /**
- * @brief Returns the intern's college.
+ * @brief Returns the intern's college enum.
  * @return College College enum value.
  */
 College XyzInternEmployee::getCollege() const {
@@ -37,7 +37,7 @@ College XyzInternEmployee::getCollege() const {
 }
 
 /**
- * @brief Returns the intern's branch.
+ * @brief Returns the intern's branch enum.
  * @return Branch Branch enum value.
  */
 Branch XyzInternEmployee::getBranch() const {
@@ -48,19 +48,38 @@ Branch XyzInternEmployee::getBranch() const {
  * @brief Prints a one-line tabular summary to stdout.
  * @return void
  */
-void XyzInternEmployee::printSummary() const {
-    std::cout << "| " << std::setw(20) << std::left << getName()
-              << "| " << std::setw(10) << std::left << getId()
-              << "| " << std::setw(12) << std::left << "Intern"
-              << "| " << std::setw(10) << std::left << HelperFunctions::convertStatusToString(getStatus())
-              << "| " << std::setw(15) << std::left << HelperFunctions::convertCollegeToString(mCollege) << "|\n";
+void XyzInternEmployee::printSummary() const
+{
+    using std::left;
+    using std::setw;
+
+    const int wName = WName, wId = WId, wGender = WGender, wType = WType, wStatus = WStatus;
+    const int wDob = WDob, wDoj = WDoj, wDol = WDol, wTotLeaves = WTotLeaves, wAvailed = WAvailed, wAgency = WAgency, wCollege = WCollege, wBranch = WBranch;
+
+    const std::string dolToShow = (getStatus() == Resigned) ? getDol() : "-";
+
+    std::cout << "|"
+              << left << setw(wName)    << getName()                                       << "|"
+              << left << setw(wId)      << getId()                                         << "|"
+              << left << setw(wGender)  << getGender()                                     << "|"
+              << left << setw(wType)    << HelperFunctions::convertTypeToString(getType()) << "|"
+              << left << setw(wStatus)  << HelperFunctions::convertStatusToString(getStatus()) << "|"
+              << left << setw(wDob)     << getDob()                                        << "|"
+              << left << setw(wDoj)     << getDoj()                                        << "|"
+              << left << setw(wDol)     << dolToShow                                       << "|"
+              << left << setw(wTotLeaves)<< "-"                                            << "|"
+              << left << setw(wAvailed) << "-"                                             << "|"
+              << left << setw(wAgency)  << "-"                                             << "|"
+              << left << setw(wCollege) << HelperFunctions::convertCollegeToString(mCollege) << "|"
+              << left << setw(wBranch)  << HelperFunctions::convertBranchToString(mBranch)   << "|\n";
 }
 
 /**
  * @brief Prints a multi-line detailed description to stdout.
  * @return void
  */
-void XyzInternEmployee::printFullDetails() const {
+void XyzInternEmployee::printFullDetails() const
+{
     std::cout << "\n--- Employee Details ---\n"
               << "  Employee Name  : " << getName() << "\n"
               << "  Employee ID    : " << getId() << "\n"
@@ -72,5 +91,5 @@ void XyzInternEmployee::printFullDetails() const {
               << "  Date of Leaving: " << getDol() << "\n"
               << "  College        : " << HelperFunctions::convertCollegeToString(mCollege) << "\n"
               << "  Branch         : " << HelperFunctions::convertBranchToString(mBranch) << "\n"
-              << "------------------------\n";
+              << "-------------------------------\n";
 }

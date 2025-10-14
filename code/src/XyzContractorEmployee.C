@@ -39,12 +39,30 @@ Agency XyzContractorEmployee::getAgency() const {
  * @brief Prints a one-line tabular summary to stdout.
  * @return void
  */
-void XyzContractorEmployee::printSummary() const {
-    std::cout << "| " << std::setw(20) << std::left << getName()
-              << "| " << std::setw(10) << std::left << getId()
-              << "| " << std::setw(12) << std::left << "Contractor"
-              << "| " << std::setw(10) << std::left << HelperFunctions::convertStatusToString(getStatus())
-              << "| " << std::setw(15) << std::left << HelperFunctions::convertAgencyToString(mAgency) << "|\n";
+void XyzContractorEmployee::printSummary() const
+{
+    using std::left;
+    using std::setw;
+
+    const int wName = WName, wId = WId, wGender = WGender, wType = WType, wStatus = WStatus;
+    const int wDob = WDob, wDoj = WDoj, wDol = WDol, wTotLeaves = WTotLeaves, wAvailed = WAvailed, wAgency = WAgency, wCollege = WCollege, wBranch = WBranch;
+
+    const std::string dolToShow = (getStatus() == Resigned) ? getDol() : "-";
+
+    std::cout << "|"
+              << left << setw(wName)    << getName()                                       << "|"
+              << left << setw(wId)      << getId()                                         << "|"
+              << left << setw(wGender)  << getGender()                                     << "|"
+              << left << setw(wType)    << HelperFunctions::convertTypeToString(getType()) << "|"
+              << left << setw(wStatus)  << HelperFunctions::convertStatusToString(getStatus()) << "|"
+              << left << setw(wDob)     << getDob()                                        << "|"
+              << left << setw(wDoj)     << getDoj()                                        << "|"
+              << left << setw(wDol)     << dolToShow                                       << "|"
+              << left << setw(wTotLeaves)<< "-"                                            << "|"
+              << left << setw(wAvailed) << "-"                                             << "|"
+              << left << setw(wAgency)  << HelperFunctions::convertAgencyToString(mAgency) << "|"
+              << left << setw(wCollege) << "-"                                             << "|"
+              << left << setw(wBranch)  << "-"                                             << "|\n";
 }
 
 /**
@@ -62,5 +80,5 @@ void XyzContractorEmployee::printFullDetails() const {
               << "  Date of Joining: " << getDoj() << "\n"
               << "  Date of Leaving: " << getDol() << "\n"
               << "  External Agency: " << HelperFunctions::convertAgencyToString(mAgency) << "\n"
-              << "------------------------\n";
+              << "-------------------------------\n";
 }

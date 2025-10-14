@@ -95,6 +95,30 @@ enum OperationsMenuOptions {
     BackToMainMenuFromOperations = -1
 };
 
+// Submenu enums for "Get Employee Details" filters
+enum TypeSubmenu
+{
+  TypeFT = 1,
+  TypeContractor = 2,
+  TypeIntern = 3,
+  TypeSubmenuCount = 3
+};
+
+enum GenderSubmenu
+{
+  GenderMale = 1,
+  GenderFemale = 2,
+  GenderSubmenuCount = 2
+};
+
+enum StatusSubmenu
+{
+  StatusActive = 1,
+  StatusInactive = 2,
+  StatusResigned = 3,
+  StatusSubmenuCount = 3
+};
+
 // Represents array sizes and limits
 enum ArrayLimits {
     MaxNamesInPool = 5,
@@ -148,6 +172,31 @@ enum StringFormatting {
     DateDayLength = 2,
     DateSeparatorLength = 1,
     TotalDateFormatLength = 10
+};
+
+// Represents string column widths used in summary tables (avoid hard-coding)
+enum ColumnWidths {
+    WName = 21,
+    WId = 11,
+    WGender = 10,
+    WType = 12,
+    WStatus = 10,
+    WDob = 12,
+    WDoj = 12,
+    WDol = 12,
+    WTotLeaves = 14,
+    WAvailed = 15,
+    // Wider to fit "Justice League"
+    WAgency = 16,
+    // Wider to fit "IIIT Hyderabad"
+    WCollege = 16,
+    WBranch = 10
+};
+
+// Represents menu context to differentiate between main menu and submenus
+enum MenuContext {
+    RootMenuContext = 0,
+    SubMenuContext = 1
 };
 
 #endif // ENUMS_H
