@@ -7,7 +7,6 @@
 #include <string>
 #include <cstddef>
 
-// Forward declaration to resolve the "unknown type name" compilation error.
 class XyzEmployeeBase;
 
 /**
@@ -24,43 +23,38 @@ private:
     Deque<XyzEmployeeIF*> mResignedEmployees;
     int mEmployeeCounter;
 
+    /**
+     * Holds validated manual inputs when adding an employee.
+     */
+    struct ManualInputs {
+        std::string mGender;
+        std::string mName;
+        std::string mDob;
+        std::string mDoj;
+    };
+
     // --- Private Menu Functions ---
     void pShowMainMenu();
     void pShowAddEmployeeMenu();
     void pShowSpecificEmployeeMenu();
-    void pShowEmployeeDetailsMenu(); 
+    void pShowEmployeeDetailsMenu();
     void pShowOtherOperationsMenu();
-    void pShowSearchMenu(); 
+    void pShowSearchMenu();
     void pShowRemoveEmployeeMenu();
-    
-    // --- Private Helper Functions for Random Data Generation ---
-    std::string pGetRandomName();
-    std::string pGetRandomGender();
-    std::string pGetRandomDate();
-    EmployeeStatus pGetRandomStatus();
-    EmployeeType pGetRandomType();
-    
-    // --- Private Logic and Utility Functions ---
-    std::string pComputeDateOfLeaving(EmployeeType typeParm, const std::string& dojParm);
-    void pPrintSummaryHeader() const;
+
+    // --- Private Helper Functions ---
     XyzEmployeeBase* pFindEmployeeAndIndex(const std::string& idParm, Deque<XyzEmployeeIF*>& dequeParm, size_t& indexOutParm);
 
+    ManualInputs pReadManualInputs() const;
+    std::string pReadGender() const;
+    std::string pReadName() const;
+    std::string pReadDate(const std::string& promptParm) const;
+
 public:
-    /**
-     * @brief Construct a new XyzEmployeeManager object.
-     */
     XyzEmployeeManager();
-
-    /**
-     * @brief Destroy the XyzEmployeeManager object and deallocate all employee memory.
-     */
     ~XyzEmployeeManager();
-
-    /**
-     * @brief Starts the main application loop for the menu-driven interface.
-     */
     void start();
-    
+
     // --- Core Employee Management Operations ---
     void addEmployee(EmployeeType typeParm, bool isRandomParm);
     bool removeEmployee(const std::string& idParm);

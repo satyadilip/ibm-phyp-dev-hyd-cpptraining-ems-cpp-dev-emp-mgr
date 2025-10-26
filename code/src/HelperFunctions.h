@@ -2,7 +2,7 @@
 #define HELPER_FUNCTIONS_H
 
 #include "Enums.h"
-#include <string> // std::string only
+#include <string>
 
 /**
  * @class HelperFunctions
@@ -11,11 +11,11 @@
 class HelperFunctions
 {
 public:
-  // Console/menu helpers
+  // menu helpers
   static void printMenu(const std::string &titleParm, const char *optionsParm[], int numOptionsParm, int exitCodeParm, MenuContext ctxParm);
   static void clearInputBuffer();
 
-  // Random data generators
+  // Random data helpers
   static std::string getRandomName(std::string genderParm);
   static std::string getRandomGender();
   static std::string getRandomDate();
@@ -23,11 +23,9 @@ public:
   static EmployeeType getRandomType();
 
   // User input helpers
-  static std::string getInputName();
-  static std::string getInputGender();
-  static std::string getInputDate(const std::string &promptParm);
+  static int getMenuChoice(int minOptionParm, int maxOptionParm, int backCodeParm);
 
-  // Date helpers (DD-MM-YYYY)
+  // Date helpers
   static void parseDate(const std::string &dateParm, int &d, int &m, int &y);
   static std::string makeDate(int d, int m, int y);
   static std::string addMonths(const std::string &dateParm, int monthsToAdd);
@@ -36,15 +34,25 @@ public:
   static std::string getRandomDOJFromDOB(const std::string &dobParm);
   static std::string computeDateOfLeaving(EmployeeType typeParm, const std::string &dojParm);
 
-  // Chronology validators
-  static bool isAtLeastYearsApart(const std::string &fromDateParm, const std::string &toDateParm, int yearsParm);
-
   // Conversions
   static std::string convertTypeToString(EmployeeType typeParm);
   static std::string convertStatusToString(EmployeeStatus statusParm);
   static std::string convertAgencyToString(Agency agencyParm);
   static std::string convertCollegeToString(College collegeParm);
   static std::string convertBranchToString(Branch branchParm);
+
+  // String helpers
+  static std::string trim(const std::string& sParm);
+  static std::string toLower(std::string sParm);
+
+  // Console input helper
+  static std::string promptLine(const std::string& promptParm);
+
+  // Validation helpers
+  static bool isValidDateString(const std::string& sParm);
+  static std::string normalizeGender(const std::string& sParm);
+
+  static bool isAtLeastYearsApart(const std::string &fromDateParm, const std::string &toDateParm, int yearsParm);
 };
 
 #endif // HELPER_FUNCTIONS_H

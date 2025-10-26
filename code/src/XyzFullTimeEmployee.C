@@ -1,7 +1,7 @@
 #include "XyzFullTimeEmployee.h"
 #include "HelperFunctions.h"
+#include "EmployeeSummary.h"
 #include <iostream>
-#include <iomanip>
 
 /**
  * @class XyzFullTimeEmployee
@@ -13,8 +13,8 @@
  * @param nameParm Employee's full name.
  * @param idParm Unique employee identifier.
  * @param genderParm Employee gender string.
- * @param dobParm Date of birth in ISO format (YYYY-MM-DD).
- * @param dojParm Date of joining in ISO format (YYYY-MM-DD).
+ * @param dobParm Date of birth in DD-MM-YYYY format.
+ * @param dojParm Date of joining in DD-MM-YYYY format.
  * @param statusParm Current employment status.
  * @param leavesAvailParm Initial leaves counter.
  * @return void
@@ -51,34 +51,23 @@ int XyzFullTimeEmployee::getLeaves() const
 }
 
 /**
- * @brief Prints a one-line tabular summary to stdout.
- * @return void
+ * @brief Converts the employee details to a summary structure.
+ * @return EmployeeSummary Struct containing summary information.
  */
-void XyzFullTimeEmployee::printSummary() const
+EmployeeSummary XyzFullTimeEmployee::toSummary() const
 {
-    using std::left;
-    using std::setw;
-
-    const int wName = WName, wId = WId, wGender = WGender, wType = WType, wStatus = WStatus;
-    const int wDob = WDob, wDoj = WDoj, wDol = WDol, wTotLeaves = WTotLeaves, wAvailed = WAvailed, wAgency = WAgency, wCollege = WCollege, wBranch = WBranch;
-
-    const int totalLeaves = MaxLeavesPerYear;
-    const int availed = totalLeaves - getLeaves();
-
-    std::cout << "|"
-              << left << setw(wName)     << getName()                                        << "|"
-              << left << setw(wId)       << getId()                                          << "|"
-              << left << setw(wGender)   << getGender()                                      << "|"
-              << left << setw(wType)     << HelperFunctions::convertTypeToString(getType())  << "|"
-              << left << setw(wStatus)   << HelperFunctions::convertStatusToString(getStatus()) << "|"
-              << left << setw(wDob)      << getDob()                                         << "|"
-              << left << setw(wDoj)      << getDoj()                                         << "|"
-              << left << setw(wDol)      << "-"                                              << "|"
-              << left << setw(wTotLeaves)<< totalLeaves                                      << "|"
-              << left << setw(wAvailed)  << availed                                          << "|"
-              << left << setw(wAgency)   << "-"                                              << "|"
-              << left << setw(wCollege)  << "-"                                              << "|"
-              << left << setw(wBranch)   << "-"                                              << "|\n";
+    EmployeeSummary sSummary;
+    sSummary.name = getName();
+    sSummary.id = getId();
+    sSummary.gender = getGender();
+    sSummary.type = HelperFunctions::convertTypeToString(getType());
+    sSummary.status = HelperFunctions::convertStatusToString(getStatus());
+    sSummary.dob = getDob();
+    sSummary.doj = getDoj();
+    sSummary.dol = (getStatus() == Resigned) ? getDol() : "-";
+    sSummary.totalLeaves = MaxLeavesPerYear;
+    sSummary.availedLeaves = MaxLeavesPerYear - getLeaves();
+    return sSummary;
 }
 
 /**

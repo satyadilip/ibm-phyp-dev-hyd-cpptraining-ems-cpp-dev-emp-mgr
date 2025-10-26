@@ -1,9 +1,13 @@
 #include "HelperFunctions.h"
 
-#include <iostream>  // cout/cin
-#include <cstdio>    // snprintf
-#include <cstdlib>   // rand/srand
-#include <ctime>     // time
+#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <ctime>
+#include <cctype>
+#include <limits>
+#include <algorithm>
+#include <sstream>
 
 // ---------------- Console/menu helpers ----------------
 
@@ -95,9 +99,9 @@ std::string HelperFunctions::getRandomGender()
  */
 std::string HelperFunctions::getRandomDate()
 {
-  int sDay = 1 + std::rand() % 28;
-  int sMonth = 1 + std::rand() % 12;
-  int sYear = 1990 + std::rand() % 30;
+  int sDay = MinDay + std::rand() % (MaxDay - MinDay + 1);
+  int sMonth = MinMonth + std::rand() % (MaxMonth - MinMonth + 1);
+  int sYear = MinBirthYear + std::rand() % (MaxBirthYear - MinBirthYear + 1);
   char sDate[11];
   std::snprintf(sDate, sizeof(sDate), "%02d-%02d-%04d", sDay, sMonth, sYear);
   return std::string(sDate);
@@ -126,40 +130,35 @@ EmployeeType HelperFunctions::getRandomType()
 // ---------------- User input helpers ----------------
 
 /**
- * @brief Prompts and reads a full-line name from stdin.
- * @return std::string Name entered by the user.
+ * Safely reads an integer input from the user with validation.
+ * Uses character-by-character reading to prevent buffer overflow.
+ * 
+ * @param minOptionParm Minimum valid option (typically 1)
+ * @param maxOptionParm Maximum valid option (typically 9)
+ * @param backCodeParm Back/exit code (typically -1)
+ * @return Valid user choice within range or backCodeParm
  */
-std::string HelperFunctions::getInputName()
+int HelperFunctions::getMenuChoice(int minOptionParm, int maxOptionParm, int backCodeParm)
 {
-  std::string sName;
-  std::cout << "Enter Name: ";
-  std::getline(std::cin >> std::ws, sName); // robust: consumes leftover newline/whitespace
-  return sName;
-}
+  int value;
+  while (true)
+  {
+    std::cin >> value;
 
-/**
- * @brief Prompts and reads a gender string from stdin.
- * @return std::string Gender entered (e.g., "Male" or "Female").
- */
-std::string HelperFunctions::getInputGender()
-{
-  std::string sGender;
-  std::cout << "Enter Gender (Male/Female): ";
-  std::cin >> sGender;
-  return sGender;
-}
+    if (std::cin.fail()) {
+      std::cin.clear();
+      std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    } else if ((value == backCodeParm) || (value >= minOptionParm && value <= maxOptionParm)) {
+      std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+      return value;
+    } else {
+      std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    }
 
-/**
- * @brief Prompts and reads a date string from stdin.
- * @param promptParm Logical label for the date being requested (e.g., "Date of Birth").
- * @return std::string Date in DD-MM-YYYY format as entered by the user.
- */
-std::string HelperFunctions::getInputDate(const std::string &promptParm)
-{
-  std::string sDate;
-  std::cout << "Enter " << promptParm << " (DD-MM-YYYY): ";
-  std::cin >> sDate;
-  return sDate;
+    std::cout << "Invalid input. Enter " << minOptionParm << "-" << maxOptionParm
+              << " or " << backCodeParm << ".\n";
+    std::cout << "Your Choice: ";
+  }
 }
 
 // ---------------- Date helpers (DD-MM-YYYY) ----------------
@@ -246,9 +245,9 @@ std::string HelperFunctions::addYears(const std::string &dateParm, int yearsToAd
  */
 std::string HelperFunctions::getRandomDOB()
 {
-  int sDay = 1 + std::rand() % 28;
-  int sMonth = 1 + std::rand() % 12;
-  int sYear = 1970 + std::rand() % 35; // 1970..2004
+  int sDay = MinDay + std::rand() % (MaxDay - MinDay + 1);
+  int sMonth = MinMonth + std::rand() % (MaxMonth - MinMonth + 1);
+  int sYear = MinBirthYear + std::rand() % (MaxBirthYear - MinBirthYear + 1);
   return makeDate(sDay, sMonth, sYear);
 }
 
@@ -382,7 +381,7 @@ std::string HelperFunctions::convertBranchToString(Branch branchParm)
   }
 }
 
-// Convert "DD-MM-YYYY" to month index (year*12 + month-1). Days ignored for coarse comparisons.
+
 static inline int sToMonthIndex(const std::string &date)
 {
   int d, m, y;
@@ -396,4 +395,69 @@ bool HelperFunctions::isAtLeastYearsApart(const std::string &fromDateParm, const
   int sTo = sToMonthIndex(toDateParm);
   int sMinDiffMonths = yearsParm * 12;
   return (sTo - sFrom) >= sMinDiffMonths;
+}
+
+// ---------------- String and validation helpers ----------------
+namespace {
+  inline std::string rtrim(std::string s) {
+    while (!s.empty() && std::isspace(static_cast<unsigned char>(s.back()))) s.pop_back();
+    return s;
+  }
+  inline std::string ltrim(std::string s) {
+    size_t sI = 0;
+    while (sI < s.size() && std::isspace(static_cast<unsigned char>(s[sI]))) ++sI;
+    return s.substr(sI);
+  }
+  inline bool allDigits(const std::string& sParm, size_t posParm, size_t lenParm) {
+    if (posParm + lenParm > sParm.size()) return false;
+    for (size_t sI = 0; sI < lenParm; ++sI)
+      if (!std::isdigit(static_cast<unsigned char>(sParm[posParm + sI]))) return false;
+    return true;
+  }
+  inline bool isLeap(int yParm) { return (yParm % 400 == 0) || ((yParm % 4 == 0) && (yParm % 100 != 0)); }
+  inline int daysInMonth(int mParm, int yParm) {
+    switch (mParm) {
+      case 1: return 31; case 2: return isLeap(yParm) ? 29 : 28; case 3: return 31; case 4: return 30;
+      case 5: return 31; case 6: return 30; case 7: return 31; case 8: return 31;
+      case 9: return 30; case 10: return 31; case 11: return 30; case 12: return 31;
+      default: return 0;
+    }
+  }
+} // namespace
+
+std::string HelperFunctions::trim(const std::string& sParm) {
+  return rtrim(ltrim(sParm));
+}
+
+std::string HelperFunctions::toLower(std::string sParm) {
+  for (char& c : sParm) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+  return sParm;
+}
+
+std::string HelperFunctions::promptLine(const std::string& promptParm) {
+  std::cout << promptParm;
+  std::string sLine;
+  std::getline(std::cin >> std::ws, sLine);
+  return sLine;
+}
+
+bool HelperFunctions::isValidDateString(const std::string& sParm) {
+  if (sParm.size() != 10) return false;
+  if (sParm[2] != '-' || sParm[5] != '-') return false;
+  if (!allDigits(sParm, 0, 2) || !allDigits(sParm, 3, 2) || !allDigits(sParm, 6, 4)) return false;
+  int dd = std::stoi(sParm.substr(0, 2));
+  int mm = std::stoi(sParm.substr(3, 2));
+  int yy = std::stoi(sParm.substr(6, 4));
+  if (yy < 1900 || yy > 3000) return false;
+  if (mm < 1 || mm > 12) return false;
+  int dim = daysInMonth(mm, yy);
+  if (dd < 1 || dd > dim) return false;
+  return true;
+}
+
+std::string HelperFunctions::normalizeGender(const std::string& sParm) {
+  auto v = toLower(trim(sParm));
+  if (v == "m" || v == "male") return "Male";
+  if (v == "f" || v == "female") return "Female";
+  return "";
 }

@@ -15,7 +15,7 @@ public:
                           Agency agencyParm, const std::string& dolParm);
 
     Agency getAgency() const;
-    void printSummary() const override;
+    EmployeeSummary toSummary() const override;
     void printFullDetails() const override;
 };
 

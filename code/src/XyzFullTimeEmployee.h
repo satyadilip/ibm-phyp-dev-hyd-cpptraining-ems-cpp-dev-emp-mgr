@@ -16,7 +16,7 @@ public:
 
     void addLeaves(int leavesParm) override;
     int getLeaves() const override;
-    void printSummary() const override;
+    EmployeeSummary toSummary() const override;
     void printFullDetails() const override;
 };
 

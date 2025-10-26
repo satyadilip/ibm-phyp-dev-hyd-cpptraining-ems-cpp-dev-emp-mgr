@@ -1,7 +1,7 @@
 #include "XyzInternEmployee.h"
 #include "HelperFunctions.h"
+#include "EmployeeSummary.h"
 #include <iostream>
-#include <iomanip>
 
 /**
  * @class XyzInternEmployee
@@ -13,12 +13,12 @@
  * @param nameParm Employee's full name.
  * @param idParm Unique employee identifier.
  * @param genderParm Employee gender string.
- * @param dobParm Date of birth in ISO format (YYYY-MM-DD).
- * @param dojParm Date of joining in ISO format (YYYY-MM-DD).
+ * @param dobParm Date of birth in DD-MM-YYYY format.
+ * @param dojParm Date of joining in DD-MM-YYYY format.
  * @param statusParm Current employment status.
  * @param collegeParm College enum value.
  * @param branchParm Branch enum value.
- * @param dolParm Date of leaving in ISO format (YYYY-MM-DD).
+ * @param dolParm Date of leaving in DD-MM-YYYY format.
  * @return void
  */
 XyzInternEmployee::XyzInternEmployee(const std::string& nameParm, const std::string& idParm,
@@ -45,33 +45,23 @@ Branch XyzInternEmployee::getBranch() const {
 }
 
 /**
- * @brief Prints a one-line tabular summary to stdout.
- * @return void
+ * @brief Converts the intern's details to an EmployeeSummary object.
+ * @return EmployeeSummary Struct containing summary information.
  */
-void XyzInternEmployee::printSummary() const
+EmployeeSummary XyzInternEmployee::toSummary() const
 {
-    using std::left;
-    using std::setw;
-
-    const int wName = WName, wId = WId, wGender = WGender, wType = WType, wStatus = WStatus;
-    const int wDob = WDob, wDoj = WDoj, wDol = WDol, wTotLeaves = WTotLeaves, wAvailed = WAvailed, wAgency = WAgency, wCollege = WCollege, wBranch = WBranch;
-
-    const std::string dolToShow = (getStatus() == Resigned) ? getDol() : "-";
-
-    std::cout << "|"
-              << left << setw(wName)    << getName()                                       << "|"
-              << left << setw(wId)      << getId()                                         << "|"
-              << left << setw(wGender)  << getGender()                                     << "|"
-              << left << setw(wType)    << HelperFunctions::convertTypeToString(getType()) << "|"
-              << left << setw(wStatus)  << HelperFunctions::convertStatusToString(getStatus()) << "|"
-              << left << setw(wDob)     << getDob()                                        << "|"
-              << left << setw(wDoj)     << getDoj()                                        << "|"
-              << left << setw(wDol)     << dolToShow                                       << "|"
-              << left << setw(wTotLeaves)<< "-"                                            << "|"
-              << left << setw(wAvailed) << "-"                                             << "|"
-              << left << setw(wAgency)  << "-"                                             << "|"
-              << left << setw(wCollege) << HelperFunctions::convertCollegeToString(mCollege) << "|"
-              << left << setw(wBranch)  << HelperFunctions::convertBranchToString(mBranch)   << "|\n";
+    EmployeeSummary sSummary;
+    sSummary.name = getName();
+    sSummary.id = getId();
+    sSummary.gender = getGender();
+    sSummary.type = HelperFunctions::convertTypeToString(getType());
+    sSummary.status = HelperFunctions::convertStatusToString(getStatus());
+    sSummary.dob = getDob();
+    sSummary.doj = getDoj();
+    sSummary.dol = (getStatus() == Resigned) ? getDol() : "-";
+    sSummary.college = HelperFunctions::convertCollegeToString(mCollege);
+    sSummary.branch = HelperFunctions::convertBranchToString(mBranch);
+    return sSummary;
 }
 
 /**

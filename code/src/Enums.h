@@ -67,6 +67,7 @@ enum SpecificEmployeeMenuOptions {
     AddFullTimeEmployee = 1,
     AddContractorEmployee,
     AddInternEmployee,
+    SpecificEmployeeMenuCount = 3,
     BackToAddMenu = -1
 };
 
@@ -137,8 +138,8 @@ enum ArrayLimits {
 
 // Represents date-related constants
 enum DateConstants {
-    MinBirthYear = 1980,
-    MaxBirthYear = 2000,
+    MinBirthYear = 1900,
+    MaxBirthYear = 2005,
     MinMonth = 1,
     MaxMonth = 12,
     MinDay = 1,
@@ -186,9 +187,7 @@ enum ColumnWidths {
     WDol = 12,
     WTotLeaves = 14,
     WAvailed = 15,
-    // Wider to fit "Justice League"
     WAgency = 16,
-    // Wider to fit "IIIT Hyderabad"
     WCollege = 16,
     WBranch = 10
 };
@@ -197,6 +196,11 @@ enum ColumnWidths {
 enum MenuContext {
     RootMenuContext = 0,
     SubMenuContext = 1
+};
+
+// Count for "Remove Employee" submenu options
+enum RemoveMenuOptionsCount {
+    RemoveMenuCount = 3
 };
 
 #endif // ENUMS_H

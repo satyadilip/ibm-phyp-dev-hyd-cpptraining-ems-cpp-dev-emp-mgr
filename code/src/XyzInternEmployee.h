@@ -17,7 +17,7 @@ public:
 
     College getCollege() const;
     Branch getBranch() const;
-    void printSummary() const override;
+    EmployeeSummary toSummary() const override;
     void printFullDetails() const override;
 };
 

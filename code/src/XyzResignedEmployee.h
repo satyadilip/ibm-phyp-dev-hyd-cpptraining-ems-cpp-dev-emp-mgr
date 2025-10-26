@@ -7,11 +7,11 @@
 class XyzResignedEmployee : public XyzEmployeeBase {
 public:
     XyzResignedEmployee(const std::string& nameParm, const std::string& idParm,
-                        EmployeeType typeParm, const std::string& genderParm, 
-                        const std::string& dobParm, const std::string& dojParm, 
+                        EmployeeType typeParm, const std::string& genderParm,
+                        const std::string& dobParm, const std::string& dojParm,
                         const std::string& dolParm);
 
-    void printSummary() const override;
+    EmployeeSummary toSummary() const override;
     void printFullDetails() const override;
 };
 
