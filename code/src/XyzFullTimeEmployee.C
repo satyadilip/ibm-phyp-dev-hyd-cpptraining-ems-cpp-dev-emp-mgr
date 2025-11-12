@@ -1,6 +1,7 @@
 #include "XyzFullTimeEmployee.h"
 #include "HelperFunctions.h"
 #include "EmployeeSummary.h"
+#include "PrintService.h"
 #include <iostream>
 
 /**
@@ -71,20 +72,20 @@ EmployeeSummary XyzFullTimeEmployee::toSummary() const
 }
 
 /**
- * @brief Prints a multi-line detailed description to stdout.
+ * @brief Prints a multi-line detailed description using PrintService.
  * @return void
  */
 void XyzFullTimeEmployee::printFullDetails() const
 {
-    std::cout << "\n--- Employee Details ---\n"
-              << "  Employee Name   : " << getName() << "\n"
-              << "  Employee ID     : " << getId() << "\n"
-              << "  Employee Type   : " << "Full-Time" << "\n"
-              << "  Employee Status : " << HelperFunctions::convertStatusToString(getStatus()) << "\n"
-              << "  Gender          : " << getGender() << "\n"
-              << "  Date of Birth   : " << getDob() << "\n"
-              << "  Date of Joining : " << getDoj() << "\n"
-              << "  Leaves Availed  : " << mLeavesAvail << "\n"
-              << "  Leaves Left     : " << (MaxLeavesPerYear - mLeavesAvail) << "\n"
-              << "-------------------------------\n";
+    PrintService::printTitle("Employee Details");
+    PrintService::printKeyValue("Employee Name", getName());
+    PrintService::printKeyValue("Employee ID", getId());
+    PrintService::printKeyValue("Employee Type", HelperFunctions::convertTypeToString(getType()));
+    PrintService::printKeyValue("Employee Status", HelperFunctions::convertStatusToString(getStatus()));
+    PrintService::printKeyValue("Gender", getGender());
+    PrintService::printKeyValue("Date of Birth", getDob());
+    PrintService::printKeyValue("Date of Joining", getDoj());
+    PrintService::printKeyValue("Leaves Availed", mLeavesAvail);
+    PrintService::printKeyValue("Leaves Left", MaxLeavesPerYear - mLeavesAvail);
+    PrintService::printDivider('-');
 }

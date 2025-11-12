@@ -1,6 +1,7 @@
 #include "XyzResignedEmployee.h"
 #include "HelperFunctions.h"
 #include "EmployeeSummary.h"
+#include "PrintService.h"
 #include <iostream>
 
 /**
@@ -26,21 +27,21 @@ XyzResignedEmployee::XyzResignedEmployee(const std::string& nameParm, const std:
     : XyzEmployeeBase(nameParm, idParm, genderParm, dobParm, dojParm, Resigned, typeParm, dolParm) {}
 
 /**
- * @brief Prints a multi-line detailed description to stdout.
+ * @brief Prints a multi-line detailed description using PrintService.
  * @return void
  */
 void XyzResignedEmployee::printFullDetails() const
 {
-    std::cout << "\n--- Archived Employee Details ---\n"
-              << "  Employee Name  : " << getName() << "\n"
-              << "  Employee ID    : " << getId() << "\n"
-              << "  Last Known Type: " << HelperFunctions::convertTypeToString(getType()) << "\n"
-              << "  Status         : " << "Resigned" << "\n"
-              << "  Gender         : " << getGender() << "\n"
-              << "  Date of Birth  : " << getDob() << "\n"
-              << "  Date of Joining: " << getDoj() << "\n"
-              << "  Date of Leaving: " << getDol() << "\n"
-              << "-------------------------------\n";
+    PrintService::printTitle("Archived Employee Details");
+    PrintService::printKeyValue("Employee Name", getName());
+    PrintService::printKeyValue("Employee ID", getId());
+    PrintService::printKeyValue("Last Known Type", HelperFunctions::convertTypeToString(getType()));
+    PrintService::printKeyValue("Status", "Resigned");
+    PrintService::printKeyValue("Gender", getGender());
+    PrintService::printKeyValue("Date of Birth", getDob());
+    PrintService::printKeyValue("Date of Joining", getDoj());
+    PrintService::printKeyValue("Date of Leaving", getDol());
+    PrintService::printDivider('-');
 }
 
 EmployeeSummary XyzResignedEmployee::toSummary() const

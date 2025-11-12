@@ -1,4 +1,5 @@
 #include "HelperFunctions.h"
+#include "PrintService.h"
 
 #include <iostream>
 #include <cstdio>
@@ -12,50 +13,7 @@
 // ---------------- Console/menu helpers ----------------
 
 /**
- * @brief Prints a formatted menu box to stdout.
- * @param titleParm Title text displayed at the top of the menu.
- * @param optionsParm Array of C-strings for each option (size >= numOptionsParm).
- * @param numOptionsParm Number of valid entries in optionsParm to display.
- * @param exitCodeParm The numeric code the user should enter to exit/go back (shown at bottom line).
- * @param ctxParm Menu context to decide label wording (Exit vs go back to previous menu).
- * @return void
- */
-void HelperFunctions::printMenu(const std::string &titleParm, const char *optionsParm[], int numOptionsParm, int exitCodeParm, MenuContext ctxParm)
-{
-  size_t sMaxLen = 0;
-  std::string sTitleLine = "       " + titleParm;
-  if (sTitleLine.length() > sMaxLen) sMaxLen = sTitleLine.length();
-
-  for (int sI = 0; sI < numOptionsParm; ++sI)
-  {
-    std::string sOpt = "       " + std::to_string(sI + 1) + ". " + optionsParm[sI];
-    if (sOpt.length() > sMaxLen) sMaxLen = sOpt.length();
-  }
-
-  std::string sExitMsg = "Press " + std::to_string(exitCodeParm) +
-                         ((ctxParm == RootMenuContext) ? " to Exit" : " to go back to previous menu");
-  std::string sExitLine = "         " + sExitMsg;
-  if (sExitLine.length() > sMaxLen) sMaxLen = sExitLine.length();
-
-  size_t sWidth = sMaxLen + 2;
-
-  std::cout << std::string(sWidth, '-') << "\n";
-  std::cout << "|" << sTitleLine << std::string(sWidth - 1 - sTitleLine.length(), ' ') << "|\n";
-  std::cout << std::string(sWidth, '-') << "\n";
-
-  for (int sI = 0; sI < numOptionsParm; ++sI)
-  {
-    std::string sOpt = "       " + std::to_string(sI + 1) + ". " + optionsParm[sI];
-    std::cout << "|" << sOpt << std::string(sWidth - 1 - sOpt.length(), ' ') << "|\n";
-  }
-
-  std::cout << "|" << sExitLine << std::string(sWidth - 1 - sExitLine.length(), ' ') << "|\n";
-  std::cout << std::string(sWidth, '-') << "\n";
-}
-
-/**
- * @brief Clears std::cin error state and drains remaining input up to newline.
- * @return void
+ * @brief Clears cin state and discards remaining line buffer.
  */
 void HelperFunctions::clearInputBuffer()
 {
@@ -67,9 +25,7 @@ void HelperFunctions::clearInputBuffer()
 // ---------------- Random data generators ----------------
 
 /**
- * @brief Returns a random name based on gender.
- * @param genderParm Gender string; "Male" selects male pool, any other selects female pool.
- * @return std::string Randomly chosen name from the respective pool.
+ * @brief Returns random name based on gender.
  */
 std::string HelperFunctions::getRandomName(std::string genderParm)
 {
@@ -84,8 +40,7 @@ std::string HelperFunctions::getRandomName(std::string genderParm)
 }
 
 /**
- * @brief Generates a random gender string.
- * @return std::string "Male" or "Female" with equal probability.
+ * @brief Returns random gender ("Male"/"Female").
  */
 std::string HelperFunctions::getRandomGender()
 {
@@ -93,9 +48,7 @@ std::string HelperFunctions::getRandomGender()
 }
 
 /**
- * @brief Generates a random date string.
- * @details Day range 01..28, month 01..12, year 1990..2019 to avoid invalid dates.
- * @return std::string Date in DD-MM-YYYY format.
+ * @brief Returns random generic date (legacy use).
  */
 std::string HelperFunctions::getRandomDate()
 {
@@ -108,8 +61,7 @@ std::string HelperFunctions::getRandomDate()
 }
 
 /**
- * @brief Picks a random EmployeeStatus.
- * @return EmployeeStatus One of the defined status enum values.
+ * @brief Picks random employee status uniformly.
  */
 EmployeeStatus HelperFunctions::getRandomStatus()
 {
@@ -118,8 +70,7 @@ EmployeeStatus HelperFunctions::getRandomStatus()
 }
 
 /**
- * @brief Picks a random EmployeeType.
- * @return EmployeeType One of the defined type enum values.
+ * @brief Picks random employee type uniformly.
  */
 EmployeeType HelperFunctions::getRandomType()
 {
@@ -130,13 +81,7 @@ EmployeeType HelperFunctions::getRandomType()
 // ---------------- User input helpers ----------------
 
 /**
- * Safely reads an integer input from the user with validation.
- * Uses character-by-character reading to prevent buffer overflow.
- * 
- * @param minOptionParm Minimum valid option (typically 1)
- * @param maxOptionParm Maximum valid option (typically 9)
- * @param backCodeParm Back/exit code (typically -1)
- * @return Valid user choice within range or backCodeParm
+ * @brief Secure menu choice input in range or back code.
  */
 int HelperFunctions::getMenuChoice(int minOptionParm, int maxOptionParm, int backCodeParm)
 {
@@ -164,12 +109,7 @@ int HelperFunctions::getMenuChoice(int minOptionParm, int maxOptionParm, int bac
 // ---------------- Date helpers (DD-MM-YYYY) ----------------
 
 /**
- * @brief Parses a DD-MM-YYYY date string into day, month, and year integers.
- * @param dateParm Input date string in DD-MM-YYYY format.
- * @param d Output day (1..31, but callers in this module clamp to <= 28).
- * @param m Output month (1..12).
- * @param y Output year (e.g., 1995).
- * @return void
+ * @brief Parses DD-MM-YYYY into d,m,y.
  */
 void HelperFunctions::parseDate(const std::string &dateParm, int &d, int &m, int &y)
 {
@@ -188,12 +128,7 @@ void HelperFunctions::parseDate(const std::string &dateParm, int &d, int &m, int
 static inline int sClamp(int v, int lo, int hi) { return v < lo ? lo : (v > hi ? hi : v); }
 
 /**
- * @brief Composes a DD-MM-YYYY date string from day, month, and year.
- * @details Day is clamped to 1..28 and month to 1..12 to avoid invalid dates.
- * @param d Day value (1..31; clamped to 1..28).
- * @param m Month value (1..12; clamped).
- * @param y Year value (e.g., 2001).
- * @return std::string Formatted date string DD-MM-YYYY.
+ * @brief Compose clamped DD-MM-YYYY string.
  */
 std::string HelperFunctions::makeDate(int d, int m, int y)
 {
@@ -205,11 +140,7 @@ std::string HelperFunctions::makeDate(int d, int m, int y)
 }
 
 /**
- * @brief Adds a number of months to a DD-MM-YYYY date string.
- * @details Preserves day up to 28; rolls month/year correctly across boundaries.
- * @param dateParm Base date in DD-MM-YYYY format.
- * @param monthsToAdd Number of months to add (can be negative; result is floored at year 0, month 1).
- * @return std::string New date in DD-MM-YYYY format.
+ * @brief Adds months with year rollover, clamps day.
  */
 std::string HelperFunctions::addMonths(const std::string &dateParm, int monthsToAdd)
 {
@@ -224,11 +155,7 @@ std::string HelperFunctions::addMonths(const std::string &dateParm, int monthsTo
 }
 
 /**
- * @brief Adds a number of years to a DD-MM-YYYY date string.
- * @details Preserves month and clamps day to <= 28 to avoid invalid dates.
- * @param dateParm Base date in DD-MM-YYYY format.
- * @param yearsToAdd Number of years to add (can be negative).
- * @return std::string New date in DD-MM-YYYY format.
+ * @brief Adds years, preserving month/day (clamped).
  */
 std::string HelperFunctions::addYears(const std::string &dateParm, int yearsToAdd)
 {
@@ -239,9 +166,7 @@ std::string HelperFunctions::addYears(const std::string &dateParm, int yearsToAd
 }
 
 /**
- * @brief Generates a random Date of Birth consistent with adult employment.
- * @details Year range 1970..2004, month 01..12, day 01..28.
- * @return std::string DOB in DD-MM-YYYY format.
+ * @brief Random DOB ensuring adulthood range.
  */
 std::string HelperFunctions::getRandomDOB()
 {
@@ -252,10 +177,7 @@ std::string HelperFunctions::getRandomDOB()
 }
 
 /**
- * @brief Generates a random Date of Joining from a given DOB.
- * @details Ensures DOJ >= DOB + 18 years, then adds up to 20 years and up to 11 months randomly.
- * @param dobParm DOB in DD-MM-YYYY format.
- * @return std::string DOJ in DD-MM-YYYY format.
+ * @brief Random DOJ >= DOB + 18 years (+ extra years/months).
  */
 std::string HelperFunctions::getRandomDOJFromDOB(const std::string &dobParm)
 {
@@ -267,14 +189,7 @@ std::string HelperFunctions::getRandomDOJFromDOB(const std::string &dobParm)
 }
 
 /**
- * @brief Computes Date of Leaving based on employee type and DOJ.
- * @details
- *  - Contractor: DOJ + ~12 months (+/- up to 3 months, min 1 month).
- *  - Intern: DOJ + 6 months.
- *  - Others: DOJ + 1..10 years plus 0..11 extra months.
- * @param typeParm Employee type used to determine rule.
- * @param dojParm Date of joining in DD-MM-YYYY format.
- * @return std::string DOL in DD-MM-YYYY format.
+ * @brief Computes date of leaving based on type rules.
  */
 std::string HelperFunctions::computeDateOfLeaving(EmployeeType typeParm, const std::string &dojParm)
 {
@@ -298,9 +213,7 @@ std::string HelperFunctions::computeDateOfLeaving(EmployeeType typeParm, const s
 // ---------------- Conversions ----------------
 
 /**
- * @brief Converts an EmployeeType enum to a human-readable string.
- * @param typeParm EmployeeType value.
- * @return std::string "Full-Time", "Contractor", "Intern", or "Unknown".
+ * @brief Converts EmployeeType to readable string.
  */
 std::string HelperFunctions::convertTypeToString(EmployeeType typeParm)
 {
@@ -314,9 +227,7 @@ std::string HelperFunctions::convertTypeToString(EmployeeType typeParm)
 }
 
 /**
- * @brief Converts an EmployeeStatus enum to a human-readable string.
- * @param statusParm EmployeeStatus value.
- * @return std::string "Active", "Inactive", "Resigned", or "Unknown".
+ * @brief Converts EmployeeStatus to readable string.
  */
 std::string HelperFunctions::convertStatusToString(EmployeeStatus statusParm)
 {
@@ -330,9 +241,7 @@ std::string HelperFunctions::convertStatusToString(EmployeeStatus statusParm)
 }
 
 /**
- * @brief Converts an Agency enum to a human-readable string.
- * @param agencyParm Agency value.
- * @return std::string Agency name or "Unknown".
+ * @brief Converts Agency enum to readable string.
  */
 std::string HelperFunctions::convertAgencyToString(Agency agencyParm)
 {
@@ -346,9 +255,7 @@ std::string HelperFunctions::convertAgencyToString(Agency agencyParm)
 }
 
 /**
- * @brief Converts a College enum to a human-readable string.
- * @param collegeParm College value.
- * @return std::string College name or "Unknown".
+ * @brief Converts College enum to readable string.
  */
 std::string HelperFunctions::convertCollegeToString(College collegeParm)
 {
@@ -366,9 +273,7 @@ std::string HelperFunctions::convertCollegeToString(College collegeParm)
 }
 
 /**
- * @brief Converts a Branch enum to a human-readable string.
- * @param branchParm Branch value.
- * @return std::string Branch code or "Unknown".
+ * @brief Converts Branch enum to readable string.
  */
 std::string HelperFunctions::convertBranchToString(Branch branchParm)
 {
@@ -441,6 +346,9 @@ std::string HelperFunctions::promptLine(const std::string& promptParm) {
   return sLine;
 }
 
+/**
+ * @brief Checks date string format and logical validity.
+ */
 bool HelperFunctions::isValidDateString(const std::string& sParm) {
   if (sParm.size() != 10) return false;
   if (sParm[2] != '-' || sParm[5] != '-') return false;
@@ -455,9 +363,25 @@ bool HelperFunctions::isValidDateString(const std::string& sParm) {
   return true;
 }
 
+/**
+ * @brief Normalizes gender tokens to canonical form.
+ */
 std::string HelperFunctions::normalizeGender(const std::string& sParm) {
   auto v = toLower(trim(sParm));
   if (v == "m" || v == "male") return "Male";
   if (v == "f" || v == "female") return "Female";
   return "";
+}
+
+/**
+ * @brief Returns current system date DD-MM-YYYY.
+ */
+std::string HelperFunctions::getCurrentDate()
+{
+  std::time_t t = std::time(nullptr);
+  std::tm* tm = std::localtime(&t);
+  char buf[11];
+  std::snprintf(buf, sizeof(buf), "%02d-%02d-%04d",
+                tm->tm_mday, tm->tm_mon + 1, tm->tm_year + 1900);
+  return std::string(buf);
 }

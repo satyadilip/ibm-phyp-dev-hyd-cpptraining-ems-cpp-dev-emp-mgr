@@ -50,6 +50,7 @@ enum Branch {
 // Represents menu options for the main menu
 enum MainMenuOptions {
     AddEmployee = 1,
+    AddMultipleEmployees, 
     RemoveEmployee,
     GetEmployeeDetails,
     DoSomethingElse,
@@ -91,8 +92,9 @@ enum DetailsMenuOptions {
 enum OperationsMenuOptions {
     AddLeavesToFullTime = 1,
     ConvertInternToFullTime,
-    SearchEmployeeById,    // <-- Renamed to avoid conflict
-    SearchEmployeeByName,  // <-- Renamed to avoid conflict
+    ConvertContractorToFullTime,
+    SearchEmployeeById,
+    SearchEmployeeByName,
     BackToMainMenuFromOperations = -1
 };
 
@@ -129,11 +131,11 @@ enum ArrayLimits {
     MaxEmployeeTypes = 3,
     MaxEmployeeStatuses = 3,
     MaxMenuOptions = 5,
-    MaxMainMenuOptions = 4,
+    MaxMainMenuOptions = 5, 
     MaxAddMenuOptions = 2,
     MaxSearchMenuOptions = 2,
     MaxDetailsMenuOptions = 5,
-    MaxOperationsMenuOptions = 4
+    MaxOperationsMenuOptions = 5 
 };
 
 // Represents date-related constants

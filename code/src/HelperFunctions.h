@@ -11,10 +11,6 @@
 class HelperFunctions
 {
 public:
-  // menu helpers
-  static void printMenu(const std::string &titleParm, const char *optionsParm[], int numOptionsParm, int exitCodeParm, MenuContext ctxParm);
-  static void clearInputBuffer();
-
   // Random data helpers
   static std::string getRandomName(std::string genderParm);
   static std::string getRandomGender();
@@ -24,6 +20,8 @@ public:
 
   // User input helpers
   static int getMenuChoice(int minOptionParm, int maxOptionParm, int backCodeParm);
+  static void clearInputBuffer();
+  static std::string getCurrentDate();
 
   // Date helpers
   static void parseDate(const std::string &dateParm, int &d, int &m, int &y);
@@ -51,7 +49,6 @@ public:
   // Validation helpers
   static bool isValidDateString(const std::string& sParm);
   static std::string normalizeGender(const std::string& sParm);
-
   static bool isAtLeastYearsApart(const std::string &fromDateParm, const std::string &toDateParm, int yearsParm);
 };
 

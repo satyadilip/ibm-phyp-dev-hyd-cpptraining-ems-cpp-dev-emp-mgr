@@ -2,8 +2,8 @@
 #include "XyzEmployeeBase.h"
 #include "EmployeeIDGenerator.h"
 #include "HelperFunctions.h"
-#include "TablePrinter.h"
 #include "EmployeeFactory.h"
+#include "PrintService.h"
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
@@ -12,20 +12,18 @@
 #include <cctype>
 
 /**
- * @brief Constructor: Initializes counters and seeds RNG.
- * @return void
+ * @brief Initializes manager state and RNG seed.
  */
-XyzEmployeeManager::XyzEmployeeManager() : mEmployeeCounter(0)
+XyzEmployeeManager::XyzEmployeeManager() : mEmployeeCounter(0) 
 {
     // seed the random number generator to get different random values on every program run
     std::srand(static_cast<unsigned int>(std::time(0)));
 }
 
 /**
- * @brief Destructor: Releases all employee objects.
- * @return void
+ * @brief Releases all allocated employee objects.
  */
-XyzEmployeeManager::~XyzEmployeeManager()
+XyzEmployeeManager::~XyzEmployeeManager() 
 {
     for (size_t sI = 0; sI < mActiveInactiveEmployees.size(); ++sI)
     {
@@ -38,36 +36,53 @@ XyzEmployeeManager::~XyzEmployeeManager()
 }
 
 /**
- * @brief Starts the main menu loop.
- * @return void
+ * @brief Starts interactive main menu loop.
  */
-void XyzEmployeeManager::start()
+void XyzEmployeeManager::start() 
 {
     pShowMainMenu();
 }
 
 /**
- * @brief Displays the main menu and handles user choices.
- * @return void
+ * @brief Displays main menu and dispatches user choices.
  */
-void XyzEmployeeManager::pShowMainMenu()
+void XyzEmployeeManager::pShowMainMenu() 
 {
     int sChoice = 0;
     do
     {
-        const char *sOptions[] = {"Add an Employee", "Remove an Employee", "Get Employee Details", "Others"};
-        HelperFunctions::printMenu("Employee Management System", sOptions, MaxMainMenuOptions, ExitMainMenu, RootMenuContext);
+        const char *sOptions[] = 
+        {
+            "Add an Employee",
+            "Add 'n' Random Employees",
+            "Remove an Employee",
+            "Get Employee Details",
+            "Others"
+        };
+        PrintService::printMenu("Employee Management System", sOptions, MaxMainMenuOptions, ExitMainMenu, RootMenuContext);
         std::cout << "Your Choice: ";
         sChoice = HelperFunctions::getMenuChoice(1, MaxMainMenuOptions, ExitMainMenu);
-
         switch (sChoice)
         {
-        case AddEmployee:          pShowAddEmployeeMenu(); break;
-        case RemoveEmployee:       pShowRemoveEmployeeMenu(); break;
-        case GetEmployeeDetails:   pShowEmployeeDetailsMenu(); break;
-        case DoSomethingElse:      pShowOtherOperationsMenu(); break;
-        case ExitMainMenu:         std::cout << "Exiting system. Goodbye!\n"; break;
-        default:                   std::cout << "Invalid choice. Please try again.\n"; break;
+        case AddEmployee:           pShowAddEmployeeMenu(); break;
+        case AddMultipleEmployees:  {
+                                        std::cout << "\nEnter how many random employees to create: ";
+                                        int sInput;
+                                        std::cin >> sInput;
+                                        if (std::cin.fail()) {
+                                            std::cin.clear();
+                                            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                                            PrintService::printError("Invalid number.");
+                                        } else {
+                                            addMultipleRandomEmployees(sInput);
+                                        }
+                                        break;
+                                    }
+        case RemoveEmployee:        pShowRemoveEmployeeMenu(); break;
+        case GetEmployeeDetails:    pShowEmployeeDetailsMenu(); break;
+        case DoSomethingElse:       pShowOtherOperationsMenu(); break;
+        case ExitMainMenu:          PrintService::printInfo("Exiting system. Goodbye!"); break;
+        default:                    PrintService::printError("Invalid choice. Please try again."); break;
         }
     } while (sChoice != ExitMainMenu);
 }
@@ -82,16 +97,15 @@ void XyzEmployeeManager::pShowAddEmployeeMenu()
     do
     {
         const char *sOptions[] = {"Add an Employee at Random", "Add an Employee (F/C/I)"};
-        HelperFunctions::printMenu("Add an Employee:", sOptions, MaxAddMenuOptions, BackToMainMenu, SubMenuContext);
+        PrintService::printMenu("Add an Employee:", sOptions, MaxAddMenuOptions, BackToMainMenu, SubMenuContext);
         std::cout << "Your Choice: ";
         sChoice = HelperFunctions::getMenuChoice(1, MaxAddMenuOptions, BackToMainMenu);
-
         switch (sChoice)
         {
         case AddRandomEmployee:    addEmployee(HelperFunctions::getRandomType(), true); break;
         case AddSpecificEmployee:  pShowSpecificEmployeeMenu(); break;
         case BackToMainMenu:       break;
-        default:                   std::cout << "Invalid choice. Please try again.\n"; break;
+        default:                   PrintService::printError("Invalid choice. Please try again."); break;
         }
     } while (sChoice != BackToMainMenu);
 }
@@ -106,7 +120,7 @@ void XyzEmployeeManager::pShowSpecificEmployeeMenu()
     do
     {
         const char *sOptions[] = {"Add Full-Time Employee", "Add Contractor Employee", "Add Intern Employee"};
-        HelperFunctions::printMenu("Add an Employee (F/C/I):", sOptions, SpecificEmployeeMenuCount, BackToAddMenu, SubMenuContext);
+        PrintService::printMenu("Add an Employee (F/C/I):", sOptions, SpecificEmployeeMenuCount, BackToAddMenu, SubMenuContext);
         std::cout << "Your Choice: ";
         sChoice = HelperFunctions::getMenuChoice(1, SpecificEmployeeMenuCount, BackToAddMenu);
 
@@ -116,7 +130,7 @@ void XyzEmployeeManager::pShowSpecificEmployeeMenu()
         case AddContractorEmployee:   addEmployee(Contractor, false); break;
         case AddInternEmployee:       addEmployee(Intern, false); break;
         case BackToAddMenu:           break;
-        default:                      std::cout << "Invalid choice. Please try again.\n"; break;
+        default:                      PrintService::printError("Invalid choice. Please try again."); break;
         }
     } while (sChoice != BackToAddMenu);
 }
@@ -131,7 +145,7 @@ void XyzEmployeeManager::pShowSearchMenu()
     do
     {
         const char *sOptions[] = {"Search by Employee ID", "Search by Employee Name"};
-        HelperFunctions::printMenu("Search Employee", sOptions, MaxSearchMenuOptions, BackToMainMenuFromSearch, SubMenuContext);
+        PrintService::printMenu("Search Employee", sOptions, MaxSearchMenuOptions, BackToMainMenuFromSearch, SubMenuContext);
         std::cout << "Your Choice: ";
         sChoice = HelperFunctions::getMenuChoice(1, MaxSearchMenuOptions, BackToMainMenuFromSearch);
 
@@ -151,7 +165,7 @@ void XyzEmployeeManager::pShowSearchMenu()
         case BackToMainMenuFromSearch:
             break;
         default:
-            std::cout << "Invalid choice. Please try again.\n";
+            PrintService::printError("Invalid choice. Please try again.");
             break;
         }
     } while (sChoice != BackToMainMenuFromSearch);
@@ -170,7 +184,7 @@ void XyzEmployeeManager::pShowEmployeeDetailsMenu()
             "All Employees Summary", "Employee Summary (F/C/I)",
             "Employee Summary (M/F)", "Employee Summary (A/I/R)",
             "Display Employee Details"};
-        HelperFunctions::printMenu("Get Employee Details:", sOptions, MaxDetailsMenuOptions, BackToMainMenuFromDetails, SubMenuContext);
+        PrintService::printMenu("Get Employee Details:", sOptions, MaxDetailsMenuOptions, BackToMainMenuFromDetails, SubMenuContext);
         std::cout << "Your Choice: ";
         sChoice = HelperFunctions::getMenuChoice(1, MaxDetailsMenuOptions, BackToMainMenuFromDetails);
 
@@ -184,7 +198,7 @@ void XyzEmployeeManager::pShowEmployeeDetailsMenu()
             int sSubChoice = 0;
             do {
                 const char *sSubOptions[] = {"Full-Time", "Contractor", "Intern"};
-                HelperFunctions::printMenu("Select Employee Type:", sSubOptions, TypeSubmenuCount, BackToMainMenuFromDetails, SubMenuContext);
+                PrintService::printMenu("Select Employee Type:", sSubOptions, TypeSubmenuCount, BackToMainMenuFromDetails, SubMenuContext);
                 std::cout << "Your Choice: ";
                 sSubChoice = HelperFunctions::getMenuChoice(1, TypeSubmenuCount, BackToMainMenuFromDetails);
                 if (sSubChoice == BackToMainMenuFromDetails) break;
@@ -194,7 +208,7 @@ void XyzEmployeeManager::pShowEmployeeDetailsMenu()
                     case TypeFT:          printSummaryByType(FullTime); break;
                     case TypeContractor:  printSummaryByType(Contractor); break;
                     case TypeIntern:      printSummaryByType(Intern); break;
-                    default:              std::cout << "Invalid choice. Please try again.\n"; continue;
+                    default:              PrintService::printError("Invalid choice. Please try again."); continue;
                 }
                 break;
             } while (true);
@@ -205,7 +219,7 @@ void XyzEmployeeManager::pShowEmployeeDetailsMenu()
             int sSubChoice = 0;
             do {
                 const char *sSubOptions[] = {"Male", "Female"};
-                HelperFunctions::printMenu("Select Gender:", sSubOptions, GenderSubmenuCount, BackToMainMenuFromDetails, SubMenuContext);
+                PrintService::printMenu("Select Gender:", sSubOptions, GenderSubmenuCount, BackToMainMenuFromDetails, SubMenuContext);
                 std::cout << "Your Choice: ";
                 sSubChoice = HelperFunctions::getMenuChoice(1, GenderSubmenuCount, BackToMainMenuFromDetails);
                 if (sSubChoice == BackToMainMenuFromDetails) break;
@@ -214,7 +228,7 @@ void XyzEmployeeManager::pShowEmployeeDetailsMenu()
                 {
                     case GenderMale:    printSummaryByGender("Male"); break;
                     case GenderFemale:  printSummaryByGender("Female"); break;
-                    default:            std::cout << "Invalid choice. Please try again.\n"; continue;
+                    default:            PrintService::printError("Invalid choice. Please try again."); continue;
                 }
                 break;
             } while (true);
@@ -225,7 +239,7 @@ void XyzEmployeeManager::pShowEmployeeDetailsMenu()
             int sSubChoice = 0;
             do {
                 const char *sSubOptions[] = {"Active", "Inactive", "Resigned"};
-                HelperFunctions::printMenu("Select Employment Status:", sSubOptions, StatusSubmenuCount, BackToMainMenuFromDetails, SubMenuContext);
+                PrintService::printMenu("Select Employment Status:", sSubOptions, StatusSubmenuCount, BackToMainMenuFromDetails, SubMenuContext);
                 std::cout << "Your Choice: ";
                 sSubChoice = HelperFunctions::getMenuChoice(1, StatusSubmenuCount, BackToMainMenuFromDetails);
                 if (sSubChoice == BackToMainMenuFromDetails) break;
@@ -235,7 +249,7 @@ void XyzEmployeeManager::pShowEmployeeDetailsMenu()
                     case StatusActive:    printSummaryByStatus(Active); break;
                     case StatusInactive:  printSummaryByStatus(Inactive); break;
                     case StatusResigned:  printSummaryByStatus(Resigned); break;
-                    default:              std::cout << "Invalid choice. Please try again.\n"; continue;
+                    default:              PrintService::printError("Invalid choice. Please try again."); continue;
                 }
                 break;
             } while (true);
@@ -252,7 +266,7 @@ void XyzEmployeeManager::pShowEmployeeDetailsMenu()
         case BackToMainMenuFromDetails:
             break;
         default:
-            std::cout << "Invalid choice. Please try again.\n";
+            PrintService::printError("Invalid choice. Please try again.");
             break;
         }
     } while (sChoice != BackToMainMenuFromDetails);
@@ -270,9 +284,11 @@ void XyzEmployeeManager::pShowOtherOperationsMenu()
         const char *sOptions[] = {
             "Add 'n' number of leaves to all the Full-Time employees",
             "Convert an Intern to Full-Time employee.",
+            "Convert a Contractor to Full-Time employee.",
             "Search an Employee by ID",
-            "Search an Employee by Name"};
-        HelperFunctions::printMenu("Do something else:", sOptions, MaxOperationsMenuOptions, BackToMainMenuFromOperations, SubMenuContext);
+            "Search an Employee by Name"
+        };
+        PrintService::printMenu("Do something else:", sOptions, MaxOperationsMenuOptions, BackToMainMenuFromOperations, SubMenuContext);
         std::cout << "Your Choice: ";
         sChoice = HelperFunctions::getMenuChoice(1, MaxOperationsMenuOptions, BackToMainMenuFromOperations);
 
@@ -286,6 +302,7 @@ void XyzEmployeeManager::pShowOtherOperationsMenu()
             if (std::cin.fail()) {
                 std::cin.clear();
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                PrintService::printError("Invalid number.");
                 sLeaves = 0;
             }
             if (sLeaves < 0) sLeaves = 0;
@@ -296,6 +313,11 @@ void XyzEmployeeManager::pShowOtherOperationsMenu()
             std::cout << "\nEnter Intern's Employee ID to convert: ";
             std::cin >> sId;
             convertInternToFullTime(sId);
+            break;
+        case ConvertContractorToFullTime:
+            std::cout << "\nEnter Contractor's Employee ID to convert: ";
+            std::cin >> sId;
+            convertContractorToFullTime(sId);
             break;
         case SearchEmployeeById:
             std::cout << "\nEnter Employee ID to search: ";
@@ -310,7 +332,7 @@ void XyzEmployeeManager::pShowOtherOperationsMenu()
         case BackToMainMenuFromOperations:
             break;
         default:
-            std::cout << "Invalid choice. Please try again.\n";
+            PrintService::printError("Invalid choice. Please try again.");
             break;
         }
     } while (sChoice != BackToMainMenuFromOperations);
@@ -326,7 +348,7 @@ void XyzEmployeeManager::pShowRemoveEmployeeMenu()
     do
     {
         const char *sOptions[] = {"Remove Full-Time Employee", "Remove Contractor Employee", "Remove Intern Employee"};
-        HelperFunctions::printMenu("Remove Employee:", sOptions, RemoveMenuCount, BackToMainMenu, SubMenuContext);
+        PrintService::printMenu("Remove Employee:", sOptions, RemoveMenuCount, BackToMainMenu, SubMenuContext);
         std::cout << "Your Choice: ";
         sChoice = HelperFunctions::getMenuChoice(1, RemoveMenuCount, BackToMainMenu);
 
@@ -351,17 +373,16 @@ void XyzEmployeeManager::pShowRemoveEmployeeMenu()
         case BackToMainMenu:
             break;
         default:
-            std::cout << "Invalid choice. Please try again.\n";
+            PrintService::printError("Invalid choice. Please try again.");
             break;
         }
     } while (sChoice != BackToMainMenu);
 }
 
 /**
- * @brief Adds an employee either randomly or via validated manual inputs.
- * @param typeParm EmployeeType to add.
- * @param isRandomParm If true, randomize all fields.
- * @return void
+ * @brief Adds employee either random or via validated manual input.
+ * @param typeParm Target employee type.
+ * @param isRandomParm If true randomizes fields.
  */
 void XyzEmployeeManager::addEmployee(EmployeeType typeParm, bool isRandomParm)
 {
@@ -419,369 +440,334 @@ void XyzEmployeeManager::addEmployee(EmployeeType typeParm, bool isRandomParm)
                   << ": " << sName << " (" << sId << ").\n";
     } else {
         mActiveInactiveEmployees.push_back(sNewEmployee);
-        std::cout << "\nAdded new " << HelperFunctions::convertTypeToString(typeParm)
-                  << ": " << sName << " (" << sId << ") with status: "
-                  << HelperFunctions::convertStatusToString(sStatus) << ".\n";
+        PrintService::printInfo("\nAdded new " + HelperFunctions::convertTypeToString(typeParm) +
+                            ": " + sName + " (" + sId + ") with status: " +
+                            HelperFunctions::convertStatusToString(sStatus) + ".");
     }
 }
 
 /**
- * @brief Removes an employee by ID.
- * @param idParm Employee ID to remove.
- * @return bool True if removed; otherwise false.
+ * @brief Bulk creation of random employees.
+ * @param countParm Number to create (1..10000).
  */
-bool XyzEmployeeManager::removeEmployee(const std::string& idParm)
+void XyzEmployeeManager::addMultipleRandomEmployees(int countParm)
 {
-    size_t sIndex = 0;
-    XyzEmployeeBase* sEmp = pFindEmployeeAndIndex(idParm, mActiveInactiveEmployees, sIndex);
-    if (!sEmp) return false;
-    delete sEmp;
-    mActiveInactiveEmployees.removeFrom(sIndex);
-    return true;
-}
-
-/**
- * @brief Marks an employee as resigned and moves to archive.
- * @param idParm Employee ID to mark resigned.
- * @return void
- */
-void XyzEmployeeManager::markEmployeeResigned(const std::string &idParm)
-{
-    size_t sIndex = 0;
-    XyzEmployeeBase *sEmp = pFindEmployeeAndIndex(idParm, mActiveInactiveEmployees, sIndex);
-    if (!sEmp)
-    {
-        std::cout << "\nError: Employee with ID " << idParm << " not found for resignation.\n";
+    if (countParm <= 0) {
+        PrintService::printError("Count must be > 0.");
         return;
     }
-
-    NewEmployeeArgs sArgs;
-    sArgs.mName   = sEmp->getName();
-    sArgs.mId     = sEmp->getId();
-    sArgs.mType   = sEmp->getType();
-    sArgs.mGender = sEmp->getGender();
-    sArgs.mDob    = sEmp->getDob();
-    sArgs.mDoj    = sEmp->getDoj();
-    sArgs.mDol    = HelperFunctions::computeDateOfLeaving(sEmp->getType(), sEmp->getDoj());
-    sArgs.mStatus = Resigned;
-
-    XyzEmployeeIF* sResigned = EmployeeFactory::create(sArgs);
-
-    mActiveInactiveEmployees.removeFrom(sIndex);
-    delete sEmp;
-    mResignedEmployees.push_back(sResigned);
-
-    std::cout << "\nSuccess: Employee " << idParm << " has been marked as RESIGNED.\n";
+    if (countParm > 10000) {
+        PrintService::printError("Count too large (max 10000).");
+        return;
+    }
+    for (int i = 0; i < countParm; ++i) {
+        addEmployee(HelperFunctions::getRandomType(), true);
+    }
+    PrintService::printInfo("Created " + std::to_string(countParm) + " random employees.");
 }
 
 /**
- * @brief Converts an intern to a full-time employee.
- * @param idParm Intern's Employee ID.
+ * @brief Moves active/inactive employee to resigned deque.
+ * @param idParm Employee ID.
+ * @param typeParm Original type (for logging).
+ */
+void XyzEmployeeManager::moveEmployeeToResigned(const std::string& idParm, EmployeeType typeParm)
+{
+    for (size_t i = 0; i < mActiveInactiveEmployees.size(); ++i)
+    {
+        if (mActiveInactiveEmployees[i]->getId() == idParm)
+        {
+            mResignedEmployees.push_back(mActiveInactiveEmployees[i]);
+            PrintService::printInfo("Employee " + mActiveInactiveEmployees[i]->getName() + " (" + idParm + ") has been resigned.");
+            mActiveInactiveEmployees.removeFrom(i);
+            return;
+        }
+    }
+    PrintService::printError("Employee ID " + idParm + " not found in active/inactive employees.");
+}
+
+/**
+ * @brief Converts an intern employee to full-time status.
+ * @param idParm Employee ID of the intern.
  * @return void
  */
 void XyzEmployeeManager::convertInternToFullTime(const std::string& idParm)
 {
-    size_t sIndex = 0;
-    XyzEmployeeBase* sEmp = pFindEmployeeAndIndex(idParm, mActiveInactiveEmployees, sIndex);
-    if (!sEmp || sEmp->getType() != Intern || sEmp->getStatus() == Resigned) {
-        std::cout << "\nError: Employee ID " << idParm << " is not a valid, active Intern.\n";
-        return;
-    }
-
-    NewEmployeeArgs sArgs;
-    sArgs.mName = sEmp->getName();
-    sArgs.mId = sEmp->getId();
-    sArgs.mGender = sEmp->getGender();
-    sArgs.mDob = sEmp->getDob();
-    sArgs.mDoj = sEmp->getDoj();
-    sArgs.mDol = "-";
-    sArgs.mType = FullTime;
-    sArgs.mStatus = Active;
-    sArgs.mLeaves = 0;
-
-    XyzEmployeeIF* sFullTime = EmployeeFactory::create(sArgs);
-    mActiveInactiveEmployees[sIndex] = sFullTime;
-    delete sEmp;
-
-    std::cout << "\nSuccess: Intern " << sArgs.mId << " has been converted to a Full-Time employee.\n";
-}
-
-/**
- * @brief Adds leaves to all full-time employees.
- * @param leavesParm Number of leaves to add.
- * @return void
- */
-void XyzEmployeeManager::addLeavesToAllFullTime(int leavesParm)
-{
     for (size_t sI = 0; sI < mActiveInactiveEmployees.size(); ++sI)
     {
-        mActiveInactiveEmployees[sI]->addLeaves(leavesParm);
-    }
-    std::cout << "\nLeaves updated for all Full-Time employees.\n";
-}
-
-/**
- * @brief Searches for an employee by ID.
- * @param idParm Employee ID to search.
- * @return void
- */
-void XyzEmployeeManager::searchById(const std::string &idParm)
-{
-    size_t sIndex = 0;
-    XyzEmployeeBase *sEmp = pFindEmployeeAndIndex(idParm, mActiveInactiveEmployees, sIndex);
-    if (sEmp)
-    {
-        std::cout << "\nFound employee in Active/Inactive list:\n";
-        sEmp->printFullDetails();
-        return;
-    }
-
-    sEmp = pFindEmployeeAndIndex(idParm, mResignedEmployees, sIndex);
-    if (sEmp)
-    {
-        std::cout << "\nFound employee in Resigned archives:\n";
-        sEmp->printFullDetails();
-        return;
-    }
-    std::cout << "\nNo employee found with ID " << idParm << ".\n";
-}
-
-/**
- * @brief Searches for employees by name.
- * @param nameParm Name to search (case-sensitive).
- * @return void
- */
-void XyzEmployeeManager::searchByName(const std::string &nameParm)
-{
-    int sFoundCount = 0;
-    std::cout << "\n--- Searching for employees named: " << nameParm << " ---\n";
-
-    for (size_t sI = 0; sI < mActiveInactiveEmployees.size(); ++sI)
-    {
-        if (mActiveInactiveEmployees[sI]->getName() == nameParm)
+        if (mActiveInactiveEmployees[sI]->getId() == idParm &&
+            mActiveInactiveEmployees[sI]->getType() == Intern)
         {
-            mActiveInactiveEmployees[sI]->printFullDetails();
-            sFoundCount++;
+            EmployeeStatus sStatus = mActiveInactiveEmployees[sI]->getStatus();
+            EmployeeType sType = FullTime;
+
+            // create new full-time employee data
+            NewEmployeeArgs sArgs;
+            sArgs.mName = mActiveInactiveEmployees[sI]->getName();
+            sArgs.mId = idParm;
+            sArgs.mGender = mActiveInactiveEmployees[sI]->getGender();
+            sArgs.mDob = mActiveInactiveEmployees[sI]->getDob();
+            sArgs.mDoj = HelperFunctions::getCurrentDate();
+            sArgs.mDol = HelperFunctions::computeDateOfLeaving(sType, sArgs.mDoj);
+            sArgs.mType = sType;
+            sArgs.mStatus = sStatus;
+            sArgs.mLeaves = std::rand() % (MaxLeavesPerYear + 1);
+
+            // remove from intern and add as full-time
+            delete mActiveInactiveEmployees[sI];
+            mActiveInactiveEmployees[sI] = EmployeeFactory::create(sArgs);
+            PrintService::printInfo("Intern " + sArgs.mName + " (" + idParm + ") has been converted to Full-Time.");
+            return;
         }
     }
+    PrintService::printError("Intern ID " + idParm + " not found.");
+}
 
+/**
+ * @brief Converts a contractor employee to full-time status.
+ * @param idParm Employee ID of the contractor.
+ * @return void
+ */
+void XyzEmployeeManager::convertContractorToFullTime(const std::string& idParm)
+{
+    for (size_t sI = 0; sI < mActiveInactiveEmployees.size(); ++sI)
+    {
+        if (mActiveInactiveEmployees[sI]->getId() == idParm &&
+            mActiveInactiveEmployees[sI]->getType() == Contractor)
+        {
+            if (mActiveInactiveEmployees[sI]->getStatus() == Resigned) {
+                PrintService::printError("Contractor ID " + idParm + " is resigned; cannot convert.");
+                return;
+            }
+
+            EmployeeStatus sStatus = mActiveInactiveEmployees[sI]->getStatus();
+            NewEmployeeArgs sArgs;
+            sArgs.mName   = mActiveInactiveEmployees[sI]->getName();
+            sArgs.mId     = idParm;
+            sArgs.mGender = mActiveInactiveEmployees[sI]->getGender();
+            sArgs.mDob    = mActiveInactiveEmployees[sI]->getDob();
+            sArgs.mDoj    = HelperFunctions::getCurrentDate();
+            sArgs.mDol    = HelperFunctions::computeDateOfLeaving(FullTime, sArgs.mDoj);
+            sArgs.mType   = FullTime;
+            sArgs.mStatus = sStatus;
+            sArgs.mLeaves = std::rand() % (MaxLeavesPerYear + 1);
+
+            delete mActiveInactiveEmployees[sI];
+            mActiveInactiveEmployees[sI] = EmployeeFactory::create(sArgs);
+
+            PrintService::printInfo("Contractor " + sArgs.mName + " (" + idParm + ") has been converted to Full-Time.");
+            return;
+        }
+    }
+    PrintService::printError("Contractor ID " + idParm + " not found.");
+}
+
+/**
+ * @brief Searches employee(s) by ID and prints details.
+ * @param idParm Employee ID to locate.
+ */
+void XyzEmployeeManager::searchById(const std::string& idParm)
+{
+    bool sFound = false;
+    for (size_t sI = 0; sI < mActiveInactiveEmployees.size(); ++sI)
+        if (mActiveInactiveEmployees[sI]->getId() == idParm) { mActiveInactiveEmployees[sI]->printFullDetails(); sFound = true; }
     for (size_t sI = 0; sI < mResignedEmployees.size(); ++sI)
-    {
-        if (mResignedEmployees[sI]->getName() == nameParm)
-        {
-            mResignedEmployees[sI]->printFullDetails();
-            sFoundCount++;
-        }
-    }
-
-    if (sFoundCount == 0)
-    {
-        std::cout << "No employees found with that name.\n";
-    }
+        if (mResignedEmployees[sI]->getId() == idParm) { mResignedEmployees[sI]->printFullDetails(); sFound = true; }
+    if (!sFound) PrintService::printError("Employee ID " + idParm + " not found.");
 }
 
 /**
- * @brief Prints details of an employee by ID.
- * @param idParm Employee ID.
- * @return void
+ * @brief Searches employee(s) by exact name and prints details.
+ * @param nameParm Name to match (case-sensitive).
  */
-void XyzEmployeeManager::printDetailsById(const std::string &idParm)
+void XyzEmployeeManager::searchByName(const std::string& nameParm)
 {
-    searchById(idParm);
+    bool sFound = false;
+    for (size_t sI = 0; sI < mActiveInactiveEmployees.size(); ++sI)
+        if (mActiveInactiveEmployees[sI]->getName() == nameParm) { mActiveInactiveEmployees[sI]->printFullDetails(); sFound = true; }
+    for (size_t sI = 0; sI < mResignedEmployees.size(); ++sI)
+        if (mResignedEmployees[sI]->getName() == nameParm) { mResignedEmployees[sI]->printFullDetails(); sFound = true; }
+    if (!sFound) PrintService::printError("Employee Name \"" + nameParm + "\" not found.");
 }
 
 /**
- * @brief Prints summary of all employees.
- * @return void
+ * @brief Prints full details for a specific employee ID.
+ * @param idParm Employee ID.
+ */
+void XyzEmployeeManager::printDetailsById(const std::string& idParm)
+{
+    for (size_t sI = 0; sI < mActiveInactiveEmployees.size(); ++sI)
+        if (mActiveInactiveEmployees[sI]->getId() == idParm) { mActiveInactiveEmployees[sI]->printFullDetails(); return; }
+    for (size_t sI = 0; sI < mResignedEmployees.size(); ++sI)
+        if (mResignedEmployees[sI]->getId() == idParm) { mResignedEmployees[sI]->printFullDetails(); return; }
+    PrintService::printError("Employee ID " + idParm + " not found.");
+}
+
+/**
+ * @brief Prints summary table of all employees.
  */
 void XyzEmployeeManager::printSummaryAll()
 {
     std::vector<EmployeeSummary> sRows;
     sRows.reserve(mActiveInactiveEmployees.size() + mResignedEmployees.size());
-    for (size_t sI = 0; sI < mActiveInactiveEmployees.size(); ++sI) {
+    for (size_t sI = 0; sI < mActiveInactiveEmployees.size(); ++sI)
         sRows.push_back(mActiveInactiveEmployees[sI]->toSummary());
-    }
-    for (size_t sI = 0; sI < mResignedEmployees.size(); ++sI) {
+    for (size_t sI = 0; sI < mResignedEmployees.size(); ++sI)
         sRows.push_back(mResignedEmployees[sI]->toSummary());
-    }
-    TablePrinter::print(sRows, "All Employees Summary");
+    PrintService::printEmployeeSummaryTable(sRows, "All Employees Summary");
 }
 
 /**
- * @brief Prints summary by employee type.
- * @param typeParm EmployeeType to filter.
- * @return void
+ * @brief Prints summary filtered by employee type.
+ * @param typeParm Type to match.
  */
 void XyzEmployeeManager::printSummaryByType(EmployeeType typeParm)
 {
     std::vector<EmployeeSummary> sRows;
-    sRows.reserve(mActiveInactiveEmployees.size() + mResignedEmployees.size());
-
-    for (size_t sI = 0; sI < mActiveInactiveEmployees.size(); ++sI) {
-        if (mActiveInactiveEmployees[sI]->getType() == typeParm) {
+    for (size_t sI = 0; sI < mActiveInactiveEmployees.size(); ++sI)
+        if (mActiveInactiveEmployees[sI]->getType() == typeParm)
             sRows.push_back(mActiveInactiveEmployees[sI]->toSummary());
-        }
-    }
-    for (size_t sI = 0; sI < mResignedEmployees.size(); ++sI) {
-        if (mResignedEmployees[sI]->getType() == typeParm) {
+    for (size_t sI = 0; sI < mResignedEmployees.size(); ++sI)
+        if (mResignedEmployees[sI]->getType() == typeParm)
             sRows.push_back(mResignedEmployees[sI]->toSummary());
-        }
-    }
-
-    TablePrinter::print(sRows, "Summary for Type: " + HelperFunctions::convertTypeToString(typeParm));
+    PrintService::printEmployeeSummaryTable(sRows, "Summary for Type: " + HelperFunctions::convertTypeToString(typeParm));
 }
 
+/**
+ * @brief Prints summary filtered by status (Active/Inactive/Resigned).
+ * @param statusParm Status to match.
+ */
 void XyzEmployeeManager::printSummaryByStatus(EmployeeStatus statusParm)
 {
     std::vector<EmployeeSummary> sRows;
-    sRows.reserve(mActiveInactiveEmployees.size() + mResignedEmployees.size());
-
-    for (size_t sI = 0; sI < mActiveInactiveEmployees.size(); ++sI) {
-        if (mActiveInactiveEmployees[sI]->getStatus() == statusParm) {
+    for (size_t sI = 0; sI < mActiveInactiveEmployees.size(); ++sI)
+        if (mActiveInactiveEmployees[sI]->getStatus() == statusParm)
             sRows.push_back(mActiveInactiveEmployees[sI]->toSummary());
-        }
-    }
-    for (size_t sI = 0; sI < mResignedEmployees.size(); ++sI) {
-        if (mResignedEmployees[sI]->getStatus() == statusParm) {
+    for (size_t sI = 0; sI < mResignedEmployees.size(); ++sI)
+        if (mResignedEmployees[sI]->getStatus() == statusParm)
             sRows.push_back(mResignedEmployees[sI]->toSummary());
-        }
-    }
-
-    TablePrinter::print(sRows, "Summary for Status: " + HelperFunctions::convertStatusToString(statusParm));
+    PrintService::printEmployeeSummaryTable(sRows, "Summary for Status: " + HelperFunctions::convertStatusToString(statusParm));
 }
 
 /**
- * @brief Prints summary by gender.
- * @param genderParm Gender string to filter.
- * @return void
+ * @brief Prints summary filtered by gender.
+ * @param genderParm "Male"/"Female".
  */
-void XyzEmployeeManager::printSummaryByGender(const std::string &genderParm)
+void XyzEmployeeManager::printSummaryByGender(const std::string& genderParm)
 {
     std::vector<EmployeeSummary> sRows;
-    sRows.reserve(mActiveInactiveEmployees.size() + mResignedEmployees.size());
-
-    for (size_t sI = 0; sI < mActiveInactiveEmployees.size(); ++sI) {
-        if (mActiveInactiveEmployees[sI]->getGender() == genderParm) {
+    for (size_t sI = 0; sI < mActiveInactiveEmployees.size(); ++sI)
+        if (mActiveInactiveEmployees[sI]->getGender() == genderParm)
             sRows.push_back(mActiveInactiveEmployees[sI]->toSummary());
-        }
-    }
-    for (size_t sI = 0; sI < mResignedEmployees.size(); ++sI) {
-        if (mResignedEmployees[sI]->getGender() == genderParm) {
+    for (size_t sI = 0; sI < mResignedEmployees.size(); ++sI)
+        if (mResignedEmployees[sI]->getGender() == genderParm)
             sRows.push_back(mResignedEmployees[sI]->toSummary());
-        }
-    }
-
-    TablePrinter::print(sRows, "Summary for Gender: " + genderParm);
+    PrintService::printEmployeeSummaryTable(sRows, "Summary for Gender: " + genderParm);
 }
 
 /**
- * @brief Finds an employee by ID and returns its index.
- * @param idParm Employee ID to search.
- * @param dequeParm Deque to search.
- * @param indexOutParm Output index if found.
- * @return XyzEmployeeBase* Pointer if found; nullptr otherwise.
+ * @brief Reads and validates gender input (M/F).
+ * @return Canonical gender string.
  */
-XyzEmployeeBase *XyzEmployeeManager::pFindEmployeeAndIndex(const std::string &idParm, Deque<XyzEmployeeIF *> &dequeParm, size_t &indexOutParm)
+std::string XyzEmployeeManager::pReadGender() const
 {
-    for (size_t sI = 0; sI < dequeParm.size(); ++sI)
+    while (true)
     {
-        if (dequeParm[sI]->getId() == idParm)
+        std::cout << "Enter Gender (M/F): ";
+        std::string sInput;
+        std::cin >> sInput;
+        if (sInput.size() == 1)
         {
-            indexOutParm = sI;
-            return static_cast<XyzEmployeeBase *>(dequeParm[sI]);
+            char c = std::toupper(sInput[0]);
+            if (c == 'M') return "Male";
+            if (c == 'F') return "Female";
         }
+        PrintService::printError("Invalid gender. Please enter M or F.");
     }
-    return nullptr;
 }
 
 /**
- * @brief Moves an employee to the resigned deque based on type and ID.
- * @param idParm Employee ID to move.
- * @param typeParm EmployeeType to match.
- * @return void
+ * @brief Reads and validates non-empty name line.
+ * @return Name string.
  */
-void XyzEmployeeManager::moveEmployeeToResigned(const std::string &idParm, EmployeeType typeParm)
+std::string XyzEmployeeManager::pReadName() const
 {
-    size_t sIndex = 0;
-    XyzEmployeeBase* sEmp = pFindEmployeeAndIndex(idParm, mActiveInactiveEmployees, sIndex);
-    if (!sEmp || sEmp->getType() != typeParm) {
-        std::cout << "\nError: Employee ID " << idParm << " not found for the specified type.\n";
-        return;
+    std::cout << "Enter Name: ";
+    std::string sName;
+    std::getline(std::cin >> std::ws, sName);
+    if (sName.empty()) {
+        PrintService::printError("Name cannot be empty.");
+        return pReadName();
     }
-
-    NewEmployeeArgs sArgs;
-    sArgs.mName = sEmp->getName();
-    sArgs.mId = sEmp->getId();
-    sArgs.mGender = sEmp->getGender();
-    sArgs.mDob = sEmp->getDob();
-    sArgs.mDoj = sEmp->getDoj();
-    sArgs.mDol = HelperFunctions::computeDateOfLeaving(typeParm, sEmp->getDoj());
-    sArgs.mType = sEmp->getType();
-    sArgs.mStatus = Resigned;
-
-    XyzEmployeeIF* sResigned = EmployeeFactory::create(sArgs);
-    mResignedEmployees.push_back(sResigned);
-    mActiveInactiveEmployees.removeFrom(sIndex);
-    delete sEmp;
-
-    std::cout << "\nEmployee " << idParm << " has been moved to resigned employees.\n";
+    return sName;
 }
 
+/**
+ * @brief Reads a date (DOB/DOJ) ensuring valid format.
+ * @param isDOB True if reading DOB, false for DOJ.
+ * @return Date string DD-MM-YYYY.
+ */
+std::string XyzEmployeeManager::pReadDate(bool isDOB) const
+{
+    while (true)
+    {
+        std::cout << "Enter " << (isDOB ? "Date of Birth" : "Date of Joining") << " (DD-MM-YYYY): ";
+        std::string sDate;
+        std::cin >> sDate;
+        if (HelperFunctions::isValidDateString(sDate)) return sDate;
+        PrintService::printError("Invalid date format. Please use DD-MM-YYYY.");
+    }
+}
 
 /**
- * @brief Reads and validates manual inputs for a new employee.
- * @return ManualInputs Struct containing validated inputs.
+ * @brief Gathers manual employee inputs enforcing age rule (DOJ >= DOB + 18y).
+ * @return ManualInputs Collected values.
  */
-XyzEmployeeManager::ManualInputs XyzEmployeeManager::pReadManualInputs() const
+XyzEmployeeManager::ManualInputs XyzEmployeeManager::pReadManualInputs()
 {
-    ManualInputs sIn;
+    XyzEmployeeManager::ManualInputs sIn;
     sIn.mGender = pReadGender();
     sIn.mName   = pReadName();
-    sIn.mDob    = pReadDate("Enter Date of Birth (DD-MM-YYYY): ");
+    sIn.mDob    = pReadDate(true);
+
+    // Enforce DOJ >= DOB + 18 years
     while (true) {
-        sIn.mDoj = pReadDate("Enter Date of Joining (DD-MM-YYYY): ");
-        if (HelperFunctions::isAtLeastYearsApart(sIn.mDob, sIn.mDoj, 18)) break;
-        std::cout << "Invalid DOJ. DOJ must be at least 18 years after DOB.\n";
+        sIn.mDoj = pReadDate(false);
+        if (HelperFunctions::isAtLeastYearsApart(sIn.mDob, sIn.mDoj, 18)) {
+            break;
+        }
+        PrintService::printError("Date of Joining must be at least 18 years after Date of Birth. Please re-enter DOJ.");
     }
     return sIn;
 }
 
 /**
- * @brief Reads a valid gender input.
- * @return std::string Validated gender string.
+ * @brief Adds specified leaves to all full-time employees.
+ * @param leavesParm Number of leaves to add.
  */
-std::string XyzEmployeeManager::pReadGender() const
+void XyzEmployeeManager::addLeavesToAllFullTime(int leavesParm)
 {
-    while (true) {
-        std::string sGender = HelperFunctions::normalizeGender(HelperFunctions::promptLine("Enter Gender (Male/Female): "));
-        if (!sGender.empty()) return sGender;
-        std::cout << "Invalid input. Please enter Male or Female.\n";
+    if (leavesParm <= 0) {
+        PrintService::printError("Leaves to add must be > 0.");
+        return;
+    }
+
+    int sUpdated = 0;
+    for (size_t sI = 0; sI < mActiveInactiveEmployees.size(); ++sI)
+    {
+        if (mActiveInactiveEmployees[sI]->getType() == FullTime) {
+            mActiveInactiveEmployees[sI]->addLeaves(leavesParm);
+            ++sUpdated;
+        }
+    }
+
+    if (sUpdated == 0) {
+        PrintService::printInfo("No full-time employees to update.");
+    } else {
+        PrintService::printInfo("Added " + std::to_string(leavesParm) +
+                                " leaves to " + std::to_string(sUpdated) +
+                                " full-time employee(s).");
     }
 }
 
-/**
- * @brief Reads a non-empty name.
- * @return std::string Non-empty name string.
- */
-std::string XyzEmployeeManager::pReadName() const
-{
-    while (true) {
-        std::string sName = HelperFunctions::trim(HelperFunctions::promptLine("Enter Name: "));
-        if (!sName.empty()) return sName;
-        std::cout << "Name cannot be empty.\n";
-    }
-}
 
-/**
- * @brief Reads a valid date string in DD-MM-YYYY format.
- * @param promptParm Prompt message for input.
- * @return std::string Validated date string.
- */
-std::string XyzEmployeeManager::pReadDate(const std::string& promptParm) const
-{
-    while (true) {
-        std::string sDate = HelperFunctions::trim(HelperFunctions::promptLine(promptParm));
-        if (HelperFunctions::isValidDateString(sDate)) return sDate;
-        std::cout << "Invalid date. Use DD-MM-YYYY and a valid calendar date.\n";
-    }
-}

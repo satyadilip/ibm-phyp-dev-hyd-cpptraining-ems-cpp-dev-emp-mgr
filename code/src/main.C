@@ -1,7 +1,8 @@
 #include "XyzEmployeeManager.h"
 
 /**
- * @brief The main entry point for the Employee Management System application.
+ * @brief Program entry point.
+ * @return int Exit code (0 on success).
  */
 int main() {
     XyzEmployeeManager sManager;

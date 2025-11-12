@@ -1,6 +1,7 @@
 #include "XyzInternEmployee.h"
 #include "HelperFunctions.h"
 #include "EmployeeSummary.h"
+#include "PrintService.h"
 #include <iostream>
 
 /**
@@ -65,21 +66,21 @@ EmployeeSummary XyzInternEmployee::toSummary() const
 }
 
 /**
- * @brief Prints a multi-line detailed description to stdout.
+ * @brief Prints a multi-line detailed description using PrintService.
  * @return void
  */
 void XyzInternEmployee::printFullDetails() const
 {
-    std::cout << "\n--- Employee Details ---\n"
-              << "  Employee Name  : " << getName() << "\n"
-              << "  Employee ID    : " << getId() << "\n"
-              << "  Employee Type  : " << "Intern" << "\n"
-              << "  Employee Status: " << HelperFunctions::convertStatusToString(getStatus()) << "\n"
-              << "  Gender         : " << getGender() << "\n"
-              << "  Date of Birth  : " << getDob() << "\n"
-              << "  Date of Joining: " << getDoj() << "\n"
-              << "  Date of Leaving: " << getDol() << "\n"
-              << "  College        : " << HelperFunctions::convertCollegeToString(mCollege) << "\n"
-              << "  Branch         : " << HelperFunctions::convertBranchToString(mBranch) << "\n"
-              << "-------------------------------\n";
+    PrintService::printTitle("Employee Details");
+    PrintService::printKeyValue("Employee Name", getName());
+    PrintService::printKeyValue("Employee ID", getId());
+    PrintService::printKeyValue("Employee Type", "Intern");
+    PrintService::printKeyValue("Employee Status", HelperFunctions::convertStatusToString(getStatus()));
+    PrintService::printKeyValue("Gender", getGender());
+    PrintService::printKeyValue("Date of Birth", getDob());
+    PrintService::printKeyValue("Date of Joining", getDoj());
+    PrintService::printKeyValue("Date of Leaving", getDol());
+    PrintService::printKeyValue("College", HelperFunctions::convertCollegeToString(mCollege));
+    PrintService::printKeyValue("Branch", HelperFunctions::convertBranchToString(mBranch));
+    PrintService::printDivider('-');
 }

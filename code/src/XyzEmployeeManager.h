@@ -42,13 +42,14 @@ private:
     void pShowSearchMenu();
     void pShowRemoveEmployeeMenu();
 
-    // --- Private Helper Functions ---
-    XyzEmployeeBase* pFindEmployeeAndIndex(const std::string& idParm, Deque<XyzEmployeeIF*>& dequeParm, size_t& indexOutParm);
-
-    ManualInputs pReadManualInputs() const;
+    // Helpers (retained)
+    XyzEmployeeBase* pFindEmployeeAndIndex(const std::string& idParm,
+                                           Deque<XyzEmployeeIF*>& dequeParm,
+                                           size_t& indexOutParm);
+    ManualInputs pReadManualInputs();
     std::string pReadGender() const;
     std::string pReadName() const;
-    std::string pReadDate(const std::string& promptParm) const;
+    std::string pReadDate(bool isDOB) const; 
 
 public:
     XyzEmployeeManager();
@@ -57,8 +58,10 @@ public:
 
     // --- Core Employee Management Operations ---
     void addEmployee(EmployeeType typeParm, bool isRandomParm);
+    void addMultipleRandomEmployees(int countParm);
     bool removeEmployee(const std::string& idParm);
     void convertInternToFullTime(const std::string& idParm);
+    void convertContractorToFullTime(const std::string& idParm);
     void addLeavesToAllFullTime(int leavesParm);
     void searchById(const std::string& idParm);
     void searchByName(const std::string& nameParm);

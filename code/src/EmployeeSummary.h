@@ -10,7 +10,7 @@ struct EmployeeSummary {
     std::string status;
     std::string dob;
     std::string doj;
-    std::string dol; // "-" if not applicable
+    std::string dol; 
 
     std::optional<int> totalLeaves;
     std::optional<int> availedLeaves;
